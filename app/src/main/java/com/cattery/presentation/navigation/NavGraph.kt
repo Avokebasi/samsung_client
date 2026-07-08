@@ -19,13 +19,13 @@ import com.cattery.presentation.screens.catalog.CatFemaleDetailScreen
 import com.cattery.presentation.screens.catalog.CatFemaleListScreen
 import com.cattery.presentation.screens.catalog.CatMaleDetailScreen
 import com.cattery.presentation.screens.catalog.CatMaleListScreen
-import com.cattery.presentation.screens.catalog.CatalogPlaceholderScreen
 import com.cattery.presentation.screens.catalog.EntityFormScreen
 import com.cattery.presentation.screens.catalog.KittenDetailScreen
 import com.cattery.presentation.screens.catalog.KittenListScreen
 import com.cattery.presentation.screens.catalog.LitterDetailScreen
 import com.cattery.presentation.screens.catalog.LitterListScreen
 import com.cattery.presentation.screens.home.HomeScreen
+import com.cattery.presentation.screens.reservations.ReservationsScreen
 import com.cattery.presentation.screens.splash.SplashScreen
 import com.cattery.presentation.theme.WhiteBackground
 import org.koin.compose.koinInject
@@ -102,9 +102,9 @@ fun CatteryNavGraph(
                 )
             }
             composable(Routes.RESERVATIONS) {
-                CatalogPlaceholderScreen(
-                    title = stringResource(R.string.reservations),
+                ReservationsScreen(
                     onBack = { navController.popBackStack() },
+                    onKittenClick = { id -> navController.navigate(Routes.kittenDetail(id)) },
                 )
             }
             composable(Routes.CAT_FEMALES) {

@@ -19,6 +19,7 @@ import com.cattery.presentation.viewmodels.KittenDetailViewModel
 import com.cattery.presentation.viewmodels.KittenListViewModel
 import com.cattery.presentation.viewmodels.LitterDetailViewModel
 import com.cattery.presentation.viewmodels.LitterListViewModel
+import com.cattery.presentation.viewmodels.ReservationsViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -54,4 +55,5 @@ val appModule = module {
     viewModel { KittenListViewModel(get(), get()) }
     viewModel { KittenDetailViewModel(get(), get()) }
     viewModel { EntityFormViewModel(get(), get()) }
+    viewModel { ReservationsViewModel(get()) }
 }

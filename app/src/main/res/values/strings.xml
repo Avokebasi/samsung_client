@@ -61,5 +61,7 @@
     <string name="form_edit_litter">Редактировать помёт</string>
     <string name="form_add_kitten">Новый котёнок</string>
     <string name="form_edit_kitten">Редактировать котёнка</string>
-    <string name="stage8_hint">Экран броней — этап 8</string>
+    <string name="empty_reservations">Пока нет броней</string>
+    <string name="reservation_buyer">Покупатель: %1$s</string>
+    <string name="reservation_date">Дата: %1$s</string>
 </resources>

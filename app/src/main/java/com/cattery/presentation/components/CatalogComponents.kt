@@ -27,14 +27,18 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.cattery.R
+import com.cattery.domain.models.ReservationDetail
 import com.cattery.presentation.theme.BluePrimary
 import com.cattery.presentation.theme.CardBackground
 import com.cattery.presentation.theme.TextPrimary
 import com.cattery.presentation.theme.TextSecondary
 import com.cattery.presentation.theme.WhiteBackground
+import com.cattery.presentation.util.DateFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -293,5 +297,64 @@ fun CatalogEmptyState(
             style = MaterialTheme.typography.bodyLarge,
             color = TextSecondary,
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ReservationListItem(
+    reservation: ReservationDetail,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        shape = MaterialTheme.shapes.medium,
+        color = CardBackground,
+        shadowElevation = 1.dp,
+        onClick = onClick,
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            PetPhoto(photoUrl = reservation.kittenPhotoUrls.firstOrNull(), size = 64.dp)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = reservation.kittenName,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = TextPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = reservation.litterName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = stringResource(R.string.reservation_buyer, reservation.buyerName),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = stringResource(
+                        R.string.reservation_date,
+                        DateFormatter.formatDateTime(reservation.reservedAt),
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
     }
 }

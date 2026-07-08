@@ -64,6 +64,10 @@ class CatalogUseCases(
         remoteRepository.refreshReservations()
     }
 
+    suspend fun refreshReservations(): Result<Unit> = runCatching {
+        remoteRepository.refreshReservations()
+    }
+
     suspend fun updateAvatar(avatarUrl: String): Result<User> = runCatching {
         remoteRepository.updateAvatar(avatarUrl)
     }
