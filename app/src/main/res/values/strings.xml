@@ -15,6 +15,9 @@
     <string name="go_to_register">Нет аккаунта? Зарегистрироваться</string>
     <string name="go_to_login">Уже есть аккаунт? Войти</string>
     <string name="reservations">Брони</string>
+    <string name="my_reservations">Мои брони</string>
+    <string name="reserve">Забронировать</string>
+    <string name="cancel_reservation">Отменить бронь</string>
     <string name="section_cat_females">Кошки</string>
     <string name="section_cat_males">Коты</string>
     <string name="section_litters">Помёты</string>

@@ -87,16 +87,18 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                if (uiState.isBreeder) {
-                    Button(
-                        onClick = onNavigateToReservations,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = BluePrimary,
-                            contentColor = WhiteBackground,
+                Button(
+                    onClick = onNavigateToReservations,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = BluePrimary,
+                        contentColor = WhiteBackground,
+                    ),
+                ) {
+                    Text(
+                        stringResource(
+                            if (uiState.isBreeder) R.string.reservations else R.string.my_reservations,
                         ),
-                    ) {
-                        Text(stringResource(R.string.reservations))
-                    }
+                    )
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 UserAvatar(

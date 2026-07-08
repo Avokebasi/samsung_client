@@ -224,6 +224,8 @@ fun CatalogDetailScaffold(
     editLabel: String,
     onEdit: () -> Unit,
     secondaryAction: Pair<String, () -> Unit>? = null,
+    primaryAction: Pair<String, () -> Unit>? = null,
+    primaryActionEnabled: Boolean = true,
     modifier: Modifier = Modifier,
     content: @Composable (PaddingValues) -> Unit,
 ) {
@@ -256,6 +258,21 @@ fun CatalogDetailScaffold(
                         colors = ButtonDefaults.buttonColors(
                             containerColor = CardBackground,
                             contentColor = BluePrimary,
+                        ),
+                    ) {
+                        Text(label)
+                    }
+                }
+                primaryAction?.let { (label, action) ->
+                    Button(
+                        onClick = action,
+                        enabled = primaryActionEnabled,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, top = 8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = BluePrimary,
+                            contentColor = WhiteBackground,
                         ),
                     ) {
                         Text(label)
@@ -305,6 +322,7 @@ fun CatalogEmptyState(
 fun ReservationListItem(
     reservation: ReservationDetail,
     onClick: () -> Unit,
+    showBuyer: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -337,13 +355,15 @@ fun ReservationListItem(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Text(
-                    text = stringResource(R.string.reservation_buyer, reservation.buyerName),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextSecondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                if (showBuyer) {
+                    Text(
+                        text = stringResource(R.string.reservation_buyer, reservation.buyerName),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
                 Text(
                     text = stringResource(
                         R.string.reservation_date,

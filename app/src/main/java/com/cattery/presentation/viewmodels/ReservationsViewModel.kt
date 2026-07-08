@@ -3,6 +3,7 @@ package com.cattery.presentation.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cattery.domain.models.ReservationDetail
+import com.cattery.domain.models.UserRole
 import com.cattery.domain.usecases.CatalogUseCases
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,6 +16,7 @@ data class ReservationsUiState(
     val items: List<ReservationDetail> = emptyList(),
     val query: String = "",
     val isLoading: Boolean = true,
+    val isBreeder: Boolean = false,
     val error: String? = null,
 )
 
@@ -27,10 +29,11 @@ class ReservationsViewModel(
 
     val uiState: StateFlow<ReservationsUiState> = combine(
         catalogUseCases.observeReservations(),
+        catalogUseCases.observeCurrentUser(),
         _query,
         _isLoading,
         _error,
-    ) { reservations, query, loading, error ->
+    ) { reservations, user, query, loading, error ->
         val filtered = if (query.isBlank()) {
             reservations
         } else {
@@ -44,6 +47,7 @@ class ReservationsViewModel(
             items = filtered,
             query = query,
             isLoading = loading,
+            isBreeder = user?.role == UserRole.BREEDER,
             error = error,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ReservationsUiState())

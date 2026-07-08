@@ -35,7 +35,9 @@ fun ReservationsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     CatalogScaffold(
-        title = stringResource(R.string.reservations),
+        title = stringResource(
+            if (uiState.isBreeder) R.string.reservations else R.string.my_reservations,
+        ),
         onBack = onBack,
         showAdd = false,
         addLabel = "",
@@ -74,6 +76,7 @@ fun ReservationsScreen(
                         items(uiState.items, key = { it.id }) { item ->
                             ReservationListItem(
                                 reservation = item,
+                                showBuyer = uiState.isBreeder,
                                 onClick = { onKittenClick(item.kittenId) },
                             )
                         }

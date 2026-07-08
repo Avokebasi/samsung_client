@@ -208,6 +208,11 @@ fun KittenDetailScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val detail = uiState.detail
     val kitten = detail?.kitten
+    val buyerAction = when {
+        uiState.canReserve -> stringResource(R.string.reserve) to viewModel::reserve
+        uiState.canCancel -> stringResource(R.string.cancel_reservation) to viewModel::cancelReservation
+        else -> null
+    }
 
     CatalogDetailScaffold(
         title = kitten?.name ?: stringResource(R.string.kitten_detail),
@@ -215,6 +220,8 @@ fun KittenDetailScreen(
         showEdit = uiState.isBreeder,
         editLabel = stringResource(R.string.edit),
         onEdit = onEdit,
+        primaryAction = buyerAction,
+        primaryActionEnabled = !uiState.isActionLoading,
     ) { padding ->
         DetailBody(
             isLoading = uiState.isLoading && kitten == null,

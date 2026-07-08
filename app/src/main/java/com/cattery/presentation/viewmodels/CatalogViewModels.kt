@@ -7,6 +7,7 @@ import com.cattery.domain.models.CatFemale
 import com.cattery.domain.models.CatMale
 import com.cattery.domain.models.Kitten
 import com.cattery.domain.models.KittenDetail
+import com.cattery.domain.models.KittenStatus
 import com.cattery.domain.models.Litter
 import com.cattery.domain.models.UserRole
 import com.cattery.domain.usecases.CatalogUseCases
@@ -438,7 +439,11 @@ class KittenListViewModel(
 data class KittenDetailUiState(
     val detail: KittenDetail? = null,
     val isLoading: Boolean = true,
+    val isActionLoading: Boolean = false,
     val isBreeder: Boolean = false,
+    val isBuyer: Boolean = false,
+    val canReserve: Boolean = false,
+    val canCancel: Boolean = false,
     val error: String? = null,
 )
 
@@ -449,18 +454,33 @@ class KittenDetailViewModel(
     private val kittenId: Long = savedStateHandle.get<Long>("id") ?: 0L
     private val _detail = MutableStateFlow<KittenDetail?>(null)
     private val _isLoading = MutableStateFlow(true)
+    private val _isActionLoading = MutableStateFlow(false)
     private val _error = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<KittenDetailUiState> = combine(
-        _detail,
-        catalogUseCases.observeCurrentUser(),
+        combine(
+            _detail,
+            catalogUseCases.observeCurrentUser(),
+            catalogUseCases.observeReservations(),
+        ) { detail, user, reservations ->
+            Triple(detail, user, reservations)
+        },
         _isLoading,
+        _isActionLoading,
         _error,
-    ) { detail, user, loading, error ->
+    ) { data, loading, actionLoading, error ->
+        val (detail, user, reservations) = data
+        val isBreeder = user?.role == UserRole.BREEDER
+        val isBuyer = user?.role == UserRole.BUYER
+        val kitten = detail?.kitten
         KittenDetailUiState(
             detail = detail,
             isLoading = loading,
-            isBreeder = user?.role == UserRole.BREEDER,
+            isActionLoading = actionLoading,
+            isBreeder = isBreeder,
+            isBuyer = isBuyer,
+            canReserve = isBuyer && kitten?.status == KittenStatus.FREE,
+            canCancel = isBuyer && reservations.any { it.kittenId == kittenId },
             error = error,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), KittenDetailUiState())
@@ -475,7 +495,30 @@ class KittenDetailViewModel(
             catalogUseCases.loadKittenDetail(kittenId)
                 .onSuccess { _detail.value = it }
                 .onFailure { _error.value = it.message }
+            catalogUseCases.refreshReservations()
             _isLoading.value = false
+        }
+    }
+
+    fun reserve() {
+        viewModelScope.launch {
+            _isActionLoading.value = true
+            _error.value = null
+            catalogUseCases.reserveKitten(kittenId)
+                .onSuccess { load() }
+                .onFailure { _error.value = it.message }
+            _isActionLoading.value = false
+        }
+    }
+
+    fun cancelReservation() {
+        viewModelScope.launch {
+            _isActionLoading.value = true
+            _error.value = null
+            catalogUseCases.cancelKittenReservation(kittenId)
+                .onSuccess { load() }
+                .onFailure { _error.value = it.message }
+            _isActionLoading.value = false
         }
     }
 }

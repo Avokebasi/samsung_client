@@ -177,6 +177,18 @@ class RemoteRepository(
         refreshCatalog()
     }
 
+    suspend fun reserveKitten(id: Long) {
+        apiService.reserveKitten(id)
+        refreshCatalog()
+        refreshReservations()
+    }
+
+    suspend fun cancelKittenReservation(id: Long) {
+        apiService.cancelKittenReservation(id)
+        refreshCatalog()
+        refreshReservations()
+    }
+
     suspend fun logout() {
         runCatching { apiService.logout() }
         tokenManager.clearToken()

@@ -160,4 +160,12 @@ class CatalogUseCases(
     suspend fun deleteKitten(id: Long): Result<Unit> = runCatching {
         remoteRepository.deleteKitten(id)
     }
+
+    suspend fun reserveKitten(id: Long): Result<Unit> = runCatching {
+        remoteRepository.reserveKitten(id)
+    }
+
+    suspend fun cancelKittenReservation(id: Long): Result<Unit> = runCatching {
+        remoteRepository.cancelKittenReservation(id)
+    }
 }
