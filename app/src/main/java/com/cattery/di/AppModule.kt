@@ -8,7 +8,9 @@ import com.cattery.data.remote.client.createKtorClient
 import com.cattery.data.remote.repository.RemoteRepository
 import com.cattery.domain.usecases.AuthUseCases
 import com.cattery.domain.usecases.CatalogUseCases
+import com.cattery.presentation.viewmodels.AuthViewModel
 import org.koin.android.ext.koin.androidContext
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val appModule = module {
@@ -30,4 +32,6 @@ val appModule = module {
 
     single { AuthUseCases(get(), get()) }
     single { CatalogUseCases(get(), get()) }
+
+    viewModel { AuthViewModel(get()) }
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -25,6 +26,10 @@ fun HomePlaceholderScreen(
     val catMales by catalogUseCases.observeCatMales().collectAsState(initial = emptyList())
     val litters by catalogUseCases.observeLitters().collectAsState(initial = emptyList())
 
+    LaunchedEffect(Unit) {
+        catalogUseCases.refreshAll()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -38,7 +43,7 @@ fun HomePlaceholderScreen(
         )
         Text(
             text = user?.let { "${it.name} (${if (it.role == UserRole.BREEDER) "заводчик" else "покупатель"})" }
-                ?: "Пользователь не загружен",
+                ?: "Загрузка…",
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(top = 12.dp),
         )

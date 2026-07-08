@@ -9,8 +9,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.cattery.data.remote.repository.RemoteRepository
-import com.cattery.presentation.screens.auth.LoginPlaceholderScreen
-import com.cattery.presentation.screens.auth.RegisterPlaceholderScreen
+import com.cattery.presentation.screens.auth.LoginScreen
+import com.cattery.presentation.screens.auth.RegisterScreen
 import com.cattery.presentation.screens.home.HomePlaceholderScreen
 import com.cattery.presentation.screens.splash.SplashScreen
 import com.cattery.presentation.theme.WhiteBackground
@@ -53,10 +53,24 @@ fun CatteryNavGraph(
                 )
             }
             composable(Routes.LOGIN) {
-                LoginPlaceholderScreen()
+                LoginScreen(
+                    onNavigateToRegister = { navController.navigate(Routes.REGISTER) },
+                    onLoginSuccess = {
+                        navController.navigate(Routes.HOME) {
+                            popUpTo(Routes.LOGIN) { inclusive = true }
+                        }
+                    },
+                )
             }
             composable(Routes.REGISTER) {
-                RegisterPlaceholderScreen()
+                RegisterScreen(
+                    onNavigateToLogin = { navController.popBackStack() },
+                    onRegisterSuccess = {
+                        navController.navigate(Routes.HOME) {
+                            popUpTo(Routes.LOGIN) { inclusive = true }
+                        }
+                    },
+                )
             }
             composable(Routes.HOME) {
                 HomePlaceholderScreen()
