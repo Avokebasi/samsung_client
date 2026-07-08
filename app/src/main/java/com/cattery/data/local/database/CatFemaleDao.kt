@@ -18,6 +18,9 @@ interface CatFemaleDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(items: List<CatFemaleEntity>)
 
+    @Query("SELECT COUNT(*) FROM cat_females")
+    suspend fun count(): Int
+
     @Query("DELETE FROM cat_females")
     suspend fun clear()
 }

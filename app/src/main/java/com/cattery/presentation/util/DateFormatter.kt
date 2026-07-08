@@ -18,4 +18,10 @@ object DateFormatter {
             .atZone(ZoneId.systemDefault())
             .format(dateTimeFormat)
     }.getOrDefault(isoDateTime)
+
+    fun formatEpochMillis(millis: Long): String = runCatching {
+        Instant.ofEpochMilli(millis)
+            .atZone(ZoneId.systemDefault())
+            .format(dateTimeFormat)
+    }.getOrDefault("")
 }

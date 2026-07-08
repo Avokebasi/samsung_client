@@ -9,12 +9,13 @@ import com.cattery.domain.models.Litter
 import com.cattery.domain.models.User
 import com.cattery.domain.models.UserRole
 import com.cattery.domain.usecases.CatalogUseCases
+import com.cattery.domain.usecases.SyncUseCases
+import com.cattery.presentation.util.uiError
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class HomeUiState(
@@ -24,6 +25,9 @@ data class HomeUiState(
     val catMales: List<CatMale> = emptyList(),
     val litters: List<Litter> = emptyList(),
     val isLoading: Boolean = true,
+    val isOnline: Boolean = true,
+    val isSyncing: Boolean = false,
+    val lastSyncMillis: Long = 0L,
     val error: String? = null,
 ) {
     val isBreeder: Boolean get() = user?.role == UserRole.BREEDER
@@ -34,6 +38,7 @@ data class HomeUiState(
 
 class HomeViewModel(
     private val catalogUseCases: CatalogUseCases,
+    syncUseCases: SyncUseCases,
 ) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(true)
@@ -54,13 +59,17 @@ class HomeViewModel(
                 litters = litters,
             )
         },
+        syncUseCases.syncState,
         _localAvatarUri,
         _isLoading,
         _error,
-    ) { state, localAvatar, loading, error ->
+    ) { state, syncState, localAvatar, loading, error ->
         state.copy(
             localAvatarUri = localAvatar,
             isLoading = loading,
+            isOnline = syncState.isOnline,
+            isSyncing = syncState.isSyncing,
+            lastSyncMillis = syncState.lastSyncMillis,
             error = error,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HomeUiState())
@@ -72,9 +81,7 @@ class HomeViewModel(
     fun refresh() {
         viewModelScope.launch {
             _isLoading.value = true
-            catalogUseCases.refreshAll()
-                .onFailure { _error.value = it.message }
-                .onSuccess { _error.value = null }
+            _error.value = catalogUseCases.refreshAll().uiError()
             _isLoading.value = false
         }
     }

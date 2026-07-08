@@ -11,6 +11,7 @@ import com.cattery.domain.models.KittenStatus
 import com.cattery.domain.models.Litter
 import com.cattery.domain.models.UserRole
 import com.cattery.domain.usecases.CatalogUseCases
+import com.cattery.presentation.util.uiError
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -96,9 +97,7 @@ class CatFemaleListViewModel(
     fun refresh() {
         viewModelScope.launch {
             _isLoading.value = true
-            catalogUseCases.refreshAll()
-                .onFailure { _error.value = it.message }
-                .onSuccess { _error.value = null }
+            _error.value = catalogUseCases.refreshAll().uiError()
             _isLoading.value = false
         }
     }
@@ -165,9 +164,7 @@ class CatMaleListViewModel(
     fun refresh() {
         viewModelScope.launch {
             _isLoading.value = true
-            catalogUseCases.refreshAll()
-                .onFailure { _error.value = it.message }
-                .onSuccess { _error.value = null }
+            _error.value = catalogUseCases.refreshAll().uiError()
             _isLoading.value = false
         }
     }
@@ -234,9 +231,7 @@ class LitterListViewModel(
     fun refresh() {
         viewModelScope.launch {
             _isLoading.value = true
-            catalogUseCases.refreshAll()
-                .onFailure { _error.value = it.message }
-                .onSuccess { _error.value = null }
+            _error.value = catalogUseCases.refreshAll().uiError()
             _isLoading.value = false
         }
     }
@@ -494,7 +489,7 @@ class KittenDetailViewModel(
             _isLoading.value = true
             catalogUseCases.loadKittenDetail(kittenId)
                 .onSuccess { _detail.value = it }
-                .onFailure { _error.value = it.message }
+                .onFailure { error -> _error.value = error.message }
             catalogUseCases.refreshReservations()
             _isLoading.value = false
         }

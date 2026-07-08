@@ -15,6 +15,9 @@ interface ReservationDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(items: List<ReservationEntity>)
 
+    @Query("SELECT COUNT(*) FROM reservations")
+    suspend fun count(): Int
+
     @Query("DELETE FROM reservations")
     suspend fun clear()
 }

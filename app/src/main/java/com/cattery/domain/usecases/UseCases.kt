@@ -12,7 +12,9 @@ import com.cattery.data.remote.api.SaveCatFemaleRequest
 import com.cattery.data.remote.api.SaveCatMaleRequest
 import com.cattery.data.remote.api.SaveKittenRequest
 import com.cattery.data.remote.api.SaveLitterRequest
+import com.cattery.data.sync.SyncManager
 import com.cattery.domain.models.ReservationDetail
+import com.cattery.domain.models.SyncOutcome
 import com.cattery.domain.models.User
 import com.cattery.domain.models.UserRole
 import kotlinx.coroutines.flow.Flow
@@ -48,6 +50,7 @@ class AuthUseCases(
 class CatalogUseCases(
     private val remoteRepository: RemoteRepository,
     private val localRepository: LocalRepository,
+    private val syncManager: SyncManager,
 ) {
     fun observeCatFemales(): Flow<List<CatFemale>> = localRepository.observeCatFemales()
 
@@ -59,14 +62,9 @@ class CatalogUseCases(
 
     fun observeCurrentUser(): Flow<User?> = localRepository.observeCurrentUser()
 
-    suspend fun refreshAll(): Result<Unit> = runCatching {
-        remoteRepository.refreshCatalog()
-        remoteRepository.refreshReservations()
-    }
+    suspend fun refreshAll(): SyncOutcome = syncManager.syncAll()
 
-    suspend fun refreshReservations(): Result<Unit> = runCatching {
-        remoteRepository.refreshReservations()
-    }
+    suspend fun refreshReservations(): SyncOutcome = syncManager.syncReservations()
 
     suspend fun updateAvatar(avatarUrl: String): Result<User> = runCatching {
         remoteRepository.updateAvatar(avatarUrl)

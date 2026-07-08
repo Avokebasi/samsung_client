@@ -17,32 +17,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.cattery.R
-import com.cattery.domain.usecases.AuthUseCases
 import com.cattery.presentation.theme.BluePrimary
 import com.cattery.presentation.theme.WhiteBackground
-import kotlinx.coroutines.delay
-import org.koin.compose.koinInject
+import com.cattery.presentation.viewmodels.SplashViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SplashScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToHome: () -> Unit,
-    authUseCases: AuthUseCases = koinInject(),
+    viewModel: SplashViewModel = koinViewModel(),
 ) {
-    LaunchedEffect(Unit) {
-        authUseCases.init()
-        delay(900)
-        if (!authUseCases.isLoggedIn()) {
-            onNavigateToLogin()
-            return@LaunchedEffect
-        }
-        val userResult = authUseCases.getCurrentUser()
-        if (userResult.isSuccess) {
-            onNavigateToHome()
-        } else {
-            authUseCases.logout()
-            onNavigateToLogin()
-        }
+    LaunchedEffect(viewModel) {
+        viewModel.start(
+            onNavigateToLogin = onNavigateToLogin,
+            onNavigateToHome = onNavigateToHome,
+        )
     }
 
     Column(

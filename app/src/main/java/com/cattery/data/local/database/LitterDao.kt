@@ -24,6 +24,9 @@ interface LitterDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(items: List<LitterEntity>)
 
+    @Query("SELECT COUNT(*) FROM litters")
+    suspend fun count(): Int
+
     @Query("DELETE FROM litters")
     suspend fun clear()
 }

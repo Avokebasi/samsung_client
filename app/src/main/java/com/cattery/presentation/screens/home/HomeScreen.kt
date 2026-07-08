@@ -30,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cattery.R
 import com.cattery.presentation.components.AvatarPickerDialog
 import com.cattery.presentation.components.HomeSectionHeader
+import com.cattery.presentation.components.LastSyncLabel
 import com.cattery.presentation.components.PetScrollCard
 import com.cattery.presentation.components.UserAvatar
 import com.cattery.presentation.components.litterSubtitle
@@ -37,6 +38,7 @@ import com.cattery.presentation.components.petAgeSubtitle
 import com.cattery.presentation.theme.BluePrimary
 import com.cattery.presentation.theme.TextSecondary
 import com.cattery.presentation.theme.WhiteBackground
+import com.cattery.presentation.util.DateFormatter
 import com.cattery.presentation.util.rememberImageCaptureHandlers
 import com.cattery.presentation.viewmodels.HomeViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -106,6 +108,14 @@ fun HomeScreen(
                     localUri = uiState.localAvatarUri,
                     onClick = { showAvatarPicker = true },
                     size = 52.dp,
+                )
+            }
+        }
+
+        if (uiState.lastSyncMillis > 0L) {
+            item {
+                LastSyncLabel(
+                    formattedTime = DateFormatter.formatEpochMillis(uiState.lastSyncMillis),
                 )
             }
         }

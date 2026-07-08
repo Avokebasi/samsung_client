@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.cattery.domain.models.ReservationDetail
 import com.cattery.domain.models.UserRole
 import com.cattery.domain.usecases.CatalogUseCases
+import com.cattery.presentation.util.uiError
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -63,9 +64,7 @@ class ReservationsViewModel(
     fun refresh() {
         viewModelScope.launch {
             _isLoading.value = true
-            catalogUseCases.refreshReservations()
-                .onFailure { _error.value = it.message }
-                .onSuccess { _error.value = null }
+            _error.value = catalogUseCases.refreshReservations().uiError()
             _isLoading.value = false
         }
     }

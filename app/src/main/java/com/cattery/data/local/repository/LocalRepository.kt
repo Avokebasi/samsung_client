@@ -118,6 +118,13 @@ class LocalRepository(
         if (items.isNotEmpty()) kittenDao.upsertAll(items.map { it.toEntity() })
     }
 
+    suspend fun hasCachedUser(): Boolean = userDao.getCurrentUser() != null
+
+    suspend fun hasCatalogCache(): Boolean =
+        catFemaleDao.count() + catMaleDao.count() + litterDao.count() + kittenDao.count() > 0
+
+    suspend fun hasReservationCache(): Boolean = reservationDao.count() > 0
+
     suspend fun clearAll() {
         database.withTransaction {
             userDao.clear()

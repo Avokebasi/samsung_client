@@ -1,11 +1,15 @@
 package com.cattery.presentation.navigation
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -13,6 +17,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.cattery.R
 import com.cattery.data.remote.repository.RemoteRepository
+import com.cattery.domain.usecases.SyncUseCases
+import com.cattery.presentation.components.OfflineBanner
 import com.cattery.presentation.screens.auth.LoginScreen
 import com.cattery.presentation.screens.auth.RegisterScreen
 import com.cattery.presentation.screens.catalog.CatFemaleDetailScreen
@@ -33,8 +39,10 @@ import org.koin.compose.koinInject
 @Composable
 fun CatteryNavGraph(
     remoteRepository: RemoteRepository = koinInject(),
+    syncUseCases: SyncUseCases = koinInject(),
 ) {
     val navController = rememberNavController()
+    val syncState by syncUseCases.syncState.collectAsStateWithLifecycle()
 
     LaunchedEffect(remoteRepository) {
         remoteRepository.unauthorizedEvents.collect {
@@ -44,14 +52,18 @@ fun CatteryNavGraph(
         }
     }
 
-    Scaffold(
-        containerColor = WhiteBackground,
-    ) { padding ->
-        NavHost(
-            navController = navController,
-            startDestination = Routes.SPLASH,
-            modifier = Modifier.padding(padding),
-        ) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        if (!syncState.isOnline) {
+            OfflineBanner()
+        }
+        Scaffold(
+            containerColor = WhiteBackground,
+        ) { padding ->
+            NavHost(
+                navController = navController,
+                startDestination = Routes.SPLASH,
+                modifier = Modifier.padding(padding),
+            ) {
             composable(Routes.SPLASH) {
                 SplashScreen(
                     onNavigateToLogin = {
@@ -220,6 +232,7 @@ fun CatteryNavGraph(
                     onCompleted = { navController.popBackStack() },
                 )
             }
+        }
         }
     }
 }
