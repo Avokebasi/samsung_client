@@ -5,6 +5,10 @@ import com.cattery.data.local.repository.LocalRepository
 import com.cattery.data.remote.api.ApiService
 import com.cattery.data.remote.api.LoginRequest
 import com.cattery.data.remote.api.RegisterRequest
+import com.cattery.data.remote.api.SaveCatFemaleRequest
+import com.cattery.data.remote.api.SaveCatMaleRequest
+import com.cattery.data.remote.api.SaveKittenRequest
+import com.cattery.data.remote.api.SaveLitterRequest
 import com.cattery.domain.models.CatFemale
 import com.cattery.domain.models.CatMale
 import com.cattery.domain.models.Kitten
@@ -127,6 +131,50 @@ class RemoteRepository(
         val detail = apiService.getKittenDetail(id)
         localRepository.upsertKitten(detail.kitten)
         return detail
+    }
+
+    suspend fun saveCatFemale(id: Long?, request: SaveCatFemaleRequest): CatFemale {
+        val item = if (id == null) apiService.createCatFemale(request) else apiService.updateCatFemale(id, request)
+        localRepository.upsertCatFemale(item)
+        return item
+    }
+
+    suspend fun deleteCatFemale(id: Long) {
+        apiService.deleteCatFemale(id)
+        refreshCatalog()
+    }
+
+    suspend fun saveCatMale(id: Long?, request: SaveCatMaleRequest): CatMale {
+        val item = if (id == null) apiService.createCatMale(request) else apiService.updateCatMale(id, request)
+        localRepository.upsertCatMale(item)
+        return item
+    }
+
+    suspend fun deleteCatMale(id: Long) {
+        apiService.deleteCatMale(id)
+        refreshCatalog()
+    }
+
+    suspend fun saveLitter(id: Long?, request: SaveLitterRequest): Litter {
+        val item = if (id == null) apiService.createLitter(request) else apiService.updateLitter(id, request)
+        localRepository.upsertLitter(item)
+        return item
+    }
+
+    suspend fun deleteLitter(id: Long) {
+        apiService.deleteLitter(id)
+        refreshCatalog()
+    }
+
+    suspend fun saveKitten(id: Long?, request: SaveKittenRequest): Kitten {
+        val item = if (id == null) apiService.createKitten(request) else apiService.updateKitten(id, request)
+        localRepository.upsertKitten(item)
+        return item
+    }
+
+    suspend fun deleteKitten(id: Long) {
+        apiService.deleteKitten(id)
+        refreshCatalog()
     }
 
     suspend fun logout() {

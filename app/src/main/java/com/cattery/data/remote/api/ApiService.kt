@@ -151,6 +151,54 @@ class ApiService(private val client: HttpClient) {
         client.delete("cat-females/$id")
     }
 
+    suspend fun createCatMale(request: SaveCatMaleRequest): CatMale =
+        client.post("cat-males") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+
+    suspend fun updateCatMale(id: Long, request: SaveCatMaleRequest): CatMale =
+        client.put("cat-males/$id") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+
+    suspend fun deleteCatMale(id: Long) {
+        client.delete("cat-males/$id")
+    }
+
+    suspend fun createLitter(request: SaveLitterRequest): Litter =
+        client.post("litters") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+
+    suspend fun updateLitter(id: Long, request: SaveLitterRequest): Litter =
+        client.put("litters/$id") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+
+    suspend fun deleteLitter(id: Long) {
+        client.delete("litters/$id")
+    }
+
+    suspend fun createKitten(request: SaveKittenRequest): Kitten =
+        client.post("kittens") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+
+    suspend fun updateKitten(id: Long, request: SaveKittenRequest): Kitten =
+        client.put("kittens/$id") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+
+    suspend fun deleteKitten(id: Long) {
+        client.delete("kittens/$id")
+    }
+
     suspend fun reserveKitten(id: Long) {
         client.post("kittens/$id/reserve")
     }

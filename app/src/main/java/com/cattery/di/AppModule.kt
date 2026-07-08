@@ -13,6 +13,7 @@ import com.cattery.presentation.viewmodels.CatFemaleDetailViewModel
 import com.cattery.presentation.viewmodels.CatFemaleListViewModel
 import com.cattery.presentation.viewmodels.CatMaleDetailViewModel
 import com.cattery.presentation.viewmodels.CatMaleListViewModel
+import com.cattery.presentation.viewmodels.EntityFormViewModel
 import com.cattery.presentation.viewmodels.HomeViewModel
 import com.cattery.presentation.viewmodels.KittenDetailViewModel
 import com.cattery.presentation.viewmodels.KittenListViewModel
@@ -52,4 +53,5 @@ val appModule = module {
     viewModel { LitterDetailViewModel(get(), get()) }
     viewModel { KittenListViewModel(get(), get()) }
     viewModel { KittenDetailViewModel(get(), get()) }
+    viewModel { EntityFormViewModel(get(), get()) }
 }

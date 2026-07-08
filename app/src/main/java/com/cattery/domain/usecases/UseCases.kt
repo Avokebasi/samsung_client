@@ -8,6 +8,10 @@ import com.cattery.domain.models.CatMale
 import com.cattery.domain.models.Kitten
 import com.cattery.domain.models.KittenDetail
 import com.cattery.domain.models.Litter
+import com.cattery.data.remote.api.SaveCatFemaleRequest
+import com.cattery.data.remote.api.SaveCatMaleRequest
+import com.cattery.data.remote.api.SaveKittenRequest
+import com.cattery.data.remote.api.SaveLitterRequest
 import com.cattery.domain.models.ReservationDetail
 import com.cattery.domain.models.User
 import com.cattery.domain.models.UserRole
@@ -119,5 +123,37 @@ class CatalogUseCases(
 
     suspend fun loadKittenDetail(id: Long): Result<KittenDetail> = runCatching {
         remoteRepository.fetchKittenDetail(id)
+    }
+
+    suspend fun saveCatFemale(id: Long?, request: SaveCatFemaleRequest): Result<CatFemale> = runCatching {
+        remoteRepository.saveCatFemale(id, request)
+    }
+
+    suspend fun deleteCatFemale(id: Long): Result<Unit> = runCatching {
+        remoteRepository.deleteCatFemale(id)
+    }
+
+    suspend fun saveCatMale(id: Long?, request: SaveCatMaleRequest): Result<CatMale> = runCatching {
+        remoteRepository.saveCatMale(id, request)
+    }
+
+    suspend fun deleteCatMale(id: Long): Result<Unit> = runCatching {
+        remoteRepository.deleteCatMale(id)
+    }
+
+    suspend fun saveLitter(id: Long?, request: SaveLitterRequest): Result<Litter> = runCatching {
+        remoteRepository.saveLitter(id, request)
+    }
+
+    suspend fun deleteLitter(id: Long): Result<Unit> = runCatching {
+        remoteRepository.deleteLitter(id)
+    }
+
+    suspend fun saveKitten(id: Long?, request: SaveKittenRequest): Result<Kitten> = runCatching {
+        remoteRepository.saveKitten(id, request)
+    }
+
+    suspend fun deleteKitten(id: Long): Result<Unit> = runCatching {
+        remoteRepository.deleteKitten(id)
     }
 }

@@ -20,7 +20,7 @@ import com.cattery.presentation.screens.catalog.CatFemaleListScreen
 import com.cattery.presentation.screens.catalog.CatMaleDetailScreen
 import com.cattery.presentation.screens.catalog.CatMaleListScreen
 import com.cattery.presentation.screens.catalog.CatalogPlaceholderScreen
-import com.cattery.presentation.screens.catalog.FormPlaceholderScreen
+import com.cattery.presentation.screens.catalog.EntityFormScreen
 import com.cattery.presentation.screens.catalog.KittenDetailScreen
 import com.cattery.presentation.screens.catalog.KittenListScreen
 import com.cattery.presentation.screens.catalog.LitterDetailScreen
@@ -117,11 +117,12 @@ fun CatteryNavGraph(
             composable(
                 route = Routes.CAT_FEMALE_DETAIL,
                 arguments = listOf(navArgument("id") { type = NavType.LongType }),
-            ) {
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getLong("id") ?: 0L
                 CatFemaleDetailScreen(
                     onBack = { navController.popBackStack() },
-                    onLitterClick = { id -> navController.navigate(Routes.litterDetail(id)) },
-                    onEdit = { navController.navigate(Routes.form("cat_female")) },
+                    onLitterClick = { litterId -> navController.navigate(Routes.litterDetail(litterId)) },
+                    onEdit = { navController.navigate(Routes.form("cat_female", entityId = id)) },
                 )
             }
             composable(Routes.CAT_MALES) {
@@ -134,11 +135,12 @@ fun CatteryNavGraph(
             composable(
                 route = Routes.CAT_MALE_DETAIL,
                 arguments = listOf(navArgument("id") { type = NavType.LongType }),
-            ) {
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getLong("id") ?: 0L
                 CatMaleDetailScreen(
                     onBack = { navController.popBackStack() },
-                    onLitterClick = { id -> navController.navigate(Routes.litterDetail(id)) },
-                    onEdit = { navController.navigate(Routes.form("cat_male")) },
+                    onLitterClick = { litterId -> navController.navigate(Routes.litterDetail(litterId)) },
+                    onEdit = { navController.navigate(Routes.form("cat_male", entityId = id)) },
                 )
             }
             composable(Routes.LITTERS) {
@@ -156,43 +158,66 @@ fun CatteryNavGraph(
                 LitterDetailScreen(
                     onBack = { navController.popBackStack() },
                     onKittensClick = { navController.navigate(Routes.litterKittens(litterId)) },
-                    onEdit = { navController.navigate(Routes.form("litter")) },
+                    onEdit = { navController.navigate(Routes.form("litter", entityId = litterId)) },
                 )
             }
             composable(
                 route = Routes.LITTER_KITTENS,
                 arguments = listOf(navArgument("litterId") { type = NavType.LongType }),
-            ) {
+            ) { backStackEntry ->
+                val litterId = backStackEntry.arguments?.getLong("litterId") ?: 0L
                 KittenListScreen(
                     onBack = { navController.popBackStack() },
                     onItemClick = { id -> navController.navigate(Routes.kittenDetail(id)) },
-                    onAdd = { navController.navigate(Routes.form("kitten")) },
+                    onAdd = { navController.navigate(Routes.form("kitten", litterId = litterId)) },
                 )
             }
             composable(
                 route = Routes.KITTEN_DETAIL,
                 arguments = listOf(navArgument("id") { type = NavType.LongType }),
-            ) {
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getLong("id") ?: 0L
                 KittenDetailScreen(
                     onBack = { navController.popBackStack() },
-                    onEdit = { navController.navigate(Routes.form("kitten")) },
+                    onEdit = { navController.navigate(Routes.form("kitten", entityId = id)) },
                 )
             }
             composable(
                 route = Routes.FORM,
-                arguments = listOf(navArgument("entityType") { type = NavType.StringType }),
+                arguments = listOf(
+                    navArgument("entityType") { type = NavType.StringType },
+                    navArgument("entityId") {
+                        type = NavType.LongType
+                        defaultValue = Routes.NO_ID
+                    },
+                    navArgument("litterId") {
+                        type = NavType.LongType
+                        defaultValue = Routes.NO_ID
+                    },
+                ),
             ) { backStackEntry ->
                 val entityType = backStackEntry.arguments?.getString("entityType").orEmpty()
+                val entityId = backStackEntry.arguments?.getLong("entityId") ?: Routes.NO_ID
+                val isEdit = entityId != Routes.NO_ID
                 val title = when (entityType) {
-                    "cat_female" -> stringResource(R.string.section_cat_females)
-                    "cat_male" -> stringResource(R.string.section_cat_males)
-                    "litter" -> stringResource(R.string.section_litters)
-                    "kitten" -> stringResource(R.string.section_kittens)
+                    "cat_female" -> stringResource(
+                        if (isEdit) R.string.form_edit_cat_female else R.string.form_add_cat_female,
+                    )
+                    "cat_male" -> stringResource(
+                        if (isEdit) R.string.form_edit_cat_male else R.string.form_add_cat_male,
+                    )
+                    "litter" -> stringResource(
+                        if (isEdit) R.string.form_edit_litter else R.string.form_add_litter,
+                    )
+                    "kitten" -> stringResource(
+                        if (isEdit) R.string.form_edit_kitten else R.string.form_add_kitten,
+                    )
                     else -> stringResource(R.string.add)
                 }
-                FormPlaceholderScreen(
+                EntityFormScreen(
                     title = title,
                     onBack = { navController.popBackStack() },
+                    onCompleted = { navController.popBackStack() },
                 )
             }
         }

@@ -48,6 +48,18 @@
     <string name="status_free">Свободен</string>
     <string name="status_reserved">Забронирован</string>
     <string name="weight_unit">г</string>
-    <string name="stage7_hint">Формы добавления и редактирования — этап 7</string>
+    <string name="save">Сохранить</string>
+    <string name="delete">Удалить</string>
+    <string name="photos">Фото</string>
+    <string name="add_photo">Добавить фото</string>
+    <string name="not_selected">Не выбрано</string>
+    <string name="form_add_cat_female">Новая кошка</string>
+    <string name="form_edit_cat_female">Редактировать кошку</string>
+    <string name="form_add_cat_male">Новый кот</string>
+    <string name="form_edit_cat_male">Редактировать кота</string>
+    <string name="form_add_litter">Новый помёт</string>
+    <string name="form_edit_litter">Редактировать помёт</string>
+    <string name="form_add_kitten">Новый котёнок</string>
+    <string name="form_edit_kitten">Редактировать котёнка</string>
     <string name="stage8_hint">Экран броней — этап 8</string>
 </resources>
