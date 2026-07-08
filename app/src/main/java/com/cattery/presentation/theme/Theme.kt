@@ -60,6 +60,7 @@ fun CatteryTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = CatteryColorScheme,
         typography = CatteryTypography,
+        shapes = CatteryShapes,
         content = content,
     )
 }
