@@ -43,6 +43,12 @@ class RemoteRepository(
         return user
     }
 
+    suspend fun updateAvatar(avatarUrl: String): User {
+        val user = apiService.updateAvatar(avatarUrl)
+        localRepository.cacheUser(user)
+        return user
+    }
+
     suspend fun refreshCatalog() {
         val catFemales = apiService.getCatFemales()
         val catMales = apiService.getCatMales()

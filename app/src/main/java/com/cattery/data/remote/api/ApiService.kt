@@ -89,6 +89,11 @@ class ApiService(private val client: HttpClient) {
 
     suspend fun getCurrentUser(): User = client.get("auth/me").body()
 
+    suspend fun updateAvatar(avatarUrl: String): User =
+        client.put("users/me/avatar") {
+            parameter("avatarUrl", avatarUrl)
+        }.body()
+
     suspend fun logout() {
         client.post("auth/logout")
     }

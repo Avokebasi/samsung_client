@@ -14,4 +14,15 @@
     <string name="role_buyer">Покупатель</string>
     <string name="go_to_register">Нет аккаунта? Зарегистрироваться</string>
     <string name="go_to_login">Уже есть аккаунт? Войти</string>
+    <string name="reservations">Брони</string>
+    <string name="section_cat_females">Кошки</string>
+    <string name="section_cat_males">Коты</string>
+    <string name="section_litters">Помёты</string>
+    <string name="empty_cat_females">Пока нет кошек</string>
+    <string name="empty_cat_males">Пока нет котов</string>
+    <string name="empty_litters">Пока нет помётов</string>
+    <string name="avatar_picker_title">Аватар</string>
+    <string name="avatar_from_gallery">Галерея</string>
+    <string name="avatar_from_camera">Камера</string>
+    <string name="stage6_hint">Список и детали — этап 6</string>
 </resources>

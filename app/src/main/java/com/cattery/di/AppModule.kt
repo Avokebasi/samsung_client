@@ -9,6 +9,7 @@ import com.cattery.data.remote.repository.RemoteRepository
 import com.cattery.domain.usecases.AuthUseCases
 import com.cattery.domain.usecases.CatalogUseCases
 import com.cattery.presentation.viewmodels.AuthViewModel
+import com.cattery.presentation.viewmodels.HomeViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -34,4 +35,5 @@ val appModule = module {
     single { CatalogUseCases(get(), get()) }
 
     viewModel { AuthViewModel(get()) }
+    viewModel { HomeViewModel(get()) }
 }
