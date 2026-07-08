@@ -105,12 +105,18 @@ class ApiService(private val client: HttpClient) {
 
     suspend fun getCatFemale(id: Long): CatFemale = client.get("cat-females/$id").body()
 
+    suspend fun getCatFemaleLitters(id: Long): List<Litter> =
+        client.get("cat-females/$id/litters").body()
+
     suspend fun getCatMales(): List<CatMale> = client.get("cat-males").body()
 
     suspend fun searchCatMales(query: String): List<CatMale> =
         client.get("cat-males/search") { parameter("q", query) }.body()
 
     suspend fun getCatMale(id: Long): CatMale = client.get("cat-males/$id").body()
+
+    suspend fun getCatMaleLitters(id: Long): List<Litter> =
+        client.get("cat-males/$id/litters").body()
 
     suspend fun getLitters(): List<Litter> = client.get("litters").body()
 

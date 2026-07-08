@@ -5,6 +5,11 @@ import com.cattery.data.local.repository.LocalRepository
 import com.cattery.data.remote.api.ApiService
 import com.cattery.data.remote.api.LoginRequest
 import com.cattery.data.remote.api.RegisterRequest
+import com.cattery.domain.models.CatFemale
+import com.cattery.domain.models.CatMale
+import com.cattery.domain.models.Kitten
+import com.cattery.domain.models.KittenDetail
+import com.cattery.domain.models.Litter
 import com.cattery.domain.models.User
 import com.cattery.domain.models.UserRole
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -62,6 +67,66 @@ class RemoteRepository(
     suspend fun refreshReservations() {
         val reservations = apiService.getReservations()
         localRepository.cacheReservations(reservations)
+    }
+
+    suspend fun searchCatFemales(query: String): List<CatFemale> {
+        val items = apiService.searchCatFemales(query)
+        items.forEach { localRepository.upsertCatFemale(it) }
+        return items
+    }
+
+    suspend fun searchCatMales(query: String): List<CatMale> {
+        val items = apiService.searchCatMales(query)
+        items.forEach { localRepository.upsertCatMale(it) }
+        return items
+    }
+
+    suspend fun searchLitters(query: String): List<Litter> {
+        val items = apiService.searchLitters(query)
+        localRepository.upsertLitters(items)
+        return items
+    }
+
+    suspend fun fetchCatFemale(id: Long): CatFemale {
+        val item = apiService.getCatFemale(id)
+        localRepository.upsertCatFemale(item)
+        return item
+    }
+
+    suspend fun fetchCatFemaleLitters(id: Long): List<Litter> {
+        val items = apiService.getCatFemaleLitters(id)
+        localRepository.upsertLitters(items)
+        return items
+    }
+
+    suspend fun fetchCatMale(id: Long): CatMale {
+        val item = apiService.getCatMale(id)
+        localRepository.upsertCatMale(item)
+        return item
+    }
+
+    suspend fun fetchCatMaleLitters(id: Long): List<Litter> {
+        val items = apiService.getCatMaleLitters(id)
+        localRepository.upsertLitters(items)
+        return items
+    }
+
+    suspend fun fetchLitter(id: Long): Litter {
+        val item = apiService.getLitter(id)
+        localRepository.upsertLitter(item)
+        return item
+    }
+
+    suspend fun fetchLitterKittens(litterId: Long): List<Kitten> {
+        val items = apiService.getLitterKittens(litterId)
+        localRepository.upsertKittens(items)
+        return items
+    }
+
+    suspend fun fetchKittenDetail(id: Long): KittenDetail {
+        val detail = apiService.getKittenDetail(id)
+        localRepository.upsertKitten(detail.kitten)
+        return detail
     }
 
     suspend fun logout() {

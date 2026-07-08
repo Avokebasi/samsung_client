@@ -6,14 +6,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.cattery.R
 import com.cattery.data.remote.repository.RemoteRepository
 import com.cattery.presentation.screens.auth.LoginScreen
 import com.cattery.presentation.screens.auth.RegisterScreen
+import com.cattery.presentation.screens.catalog.CatFemaleDetailScreen
+import com.cattery.presentation.screens.catalog.CatFemaleListScreen
+import com.cattery.presentation.screens.catalog.CatMaleDetailScreen
+import com.cattery.presentation.screens.catalog.CatMaleListScreen
 import com.cattery.presentation.screens.catalog.CatalogPlaceholderScreen
+import com.cattery.presentation.screens.catalog.FormPlaceholderScreen
+import com.cattery.presentation.screens.catalog.KittenDetailScreen
+import com.cattery.presentation.screens.catalog.KittenListScreen
+import com.cattery.presentation.screens.catalog.LitterDetailScreen
+import com.cattery.presentation.screens.catalog.LitterListScreen
 import com.cattery.presentation.screens.home.HomeScreen
 import com.cattery.presentation.screens.splash.SplashScreen
 import com.cattery.presentation.theme.WhiteBackground
@@ -81,7 +92,13 @@ fun CatteryNavGraph(
                     onNavigateToCatFemales = { navController.navigate(Routes.CAT_FEMALES) },
                     onNavigateToCatMales = { navController.navigate(Routes.CAT_MALES) },
                     onNavigateToLitters = { navController.navigate(Routes.LITTERS) },
-                    onPetClick = { _, _ -> },
+                    onPetClick = { type, id ->
+                        when (type) {
+                            "female" -> navController.navigate(Routes.catFemaleDetail(id))
+                            "male" -> navController.navigate(Routes.catMaleDetail(id))
+                            "litter" -> navController.navigate(Routes.litterDetail(id))
+                        }
+                    },
                 )
             }
             composable(Routes.RESERVATIONS) {
@@ -91,20 +108,90 @@ fun CatteryNavGraph(
                 )
             }
             composable(Routes.CAT_FEMALES) {
-                CatalogPlaceholderScreen(
-                    title = stringResource(R.string.section_cat_females),
+                CatFemaleListScreen(
                     onBack = { navController.popBackStack() },
+                    onItemClick = { id -> navController.navigate(Routes.catFemaleDetail(id)) },
+                    onAdd = { navController.navigate(Routes.form("cat_female")) },
+                )
+            }
+            composable(
+                route = Routes.CAT_FEMALE_DETAIL,
+                arguments = listOf(navArgument("id") { type = NavType.LongType }),
+            ) {
+                CatFemaleDetailScreen(
+                    onBack = { navController.popBackStack() },
+                    onLitterClick = { id -> navController.navigate(Routes.litterDetail(id)) },
+                    onEdit = { navController.navigate(Routes.form("cat_female")) },
                 )
             }
             composable(Routes.CAT_MALES) {
-                CatalogPlaceholderScreen(
-                    title = stringResource(R.string.section_cat_males),
+                CatMaleListScreen(
                     onBack = { navController.popBackStack() },
+                    onItemClick = { id -> navController.navigate(Routes.catMaleDetail(id)) },
+                    onAdd = { navController.navigate(Routes.form("cat_male")) },
+                )
+            }
+            composable(
+                route = Routes.CAT_MALE_DETAIL,
+                arguments = listOf(navArgument("id") { type = NavType.LongType }),
+            ) {
+                CatMaleDetailScreen(
+                    onBack = { navController.popBackStack() },
+                    onLitterClick = { id -> navController.navigate(Routes.litterDetail(id)) },
+                    onEdit = { navController.navigate(Routes.form("cat_male")) },
                 )
             }
             composable(Routes.LITTERS) {
-                CatalogPlaceholderScreen(
-                    title = stringResource(R.string.section_litters),
+                LitterListScreen(
+                    onBack = { navController.popBackStack() },
+                    onItemClick = { id -> navController.navigate(Routes.litterDetail(id)) },
+                    onAdd = { navController.navigate(Routes.form("litter")) },
+                )
+            }
+            composable(
+                route = Routes.LITTER_DETAIL,
+                arguments = listOf(navArgument("id") { type = NavType.LongType }),
+            ) { backStackEntry ->
+                val litterId = backStackEntry.arguments?.getLong("id") ?: 0L
+                LitterDetailScreen(
+                    onBack = { navController.popBackStack() },
+                    onKittensClick = { navController.navigate(Routes.litterKittens(litterId)) },
+                    onEdit = { navController.navigate(Routes.form("litter")) },
+                )
+            }
+            composable(
+                route = Routes.LITTER_KITTENS,
+                arguments = listOf(navArgument("litterId") { type = NavType.LongType }),
+            ) {
+                KittenListScreen(
+                    onBack = { navController.popBackStack() },
+                    onItemClick = { id -> navController.navigate(Routes.kittenDetail(id)) },
+                    onAdd = { navController.navigate(Routes.form("kitten")) },
+                )
+            }
+            composable(
+                route = Routes.KITTEN_DETAIL,
+                arguments = listOf(navArgument("id") { type = NavType.LongType }),
+            ) {
+                KittenDetailScreen(
+                    onBack = { navController.popBackStack() },
+                    onEdit = { navController.navigate(Routes.form("kitten")) },
+                )
+            }
+            composable(
+                route = Routes.FORM,
+                arguments = listOf(navArgument("entityType") { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val entityType = backStackEntry.arguments?.getString("entityType").orEmpty()
+                val title = when (entityType) {
+                    "cat_female" -> stringResource(R.string.section_cat_females)
+                    "cat_male" -> stringResource(R.string.section_cat_males)
+                    "litter" -> stringResource(R.string.section_litters)
+                    "kitten" -> stringResource(R.string.section_kittens)
+                    else -> stringResource(R.string.add)
+                }
+                FormPlaceholderScreen(
+                    title = title,
                     onBack = { navController.popBackStack() },
                 )
             }

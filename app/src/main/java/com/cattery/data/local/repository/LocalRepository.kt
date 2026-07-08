@@ -29,14 +29,32 @@ class LocalRepository(
     fun observeCatFemales(): Flow<List<CatFemale>> =
         catFemaleDao.observeAll().map { list -> list.map { it.toDomain() } }
 
+    fun observeCatFemale(id: Long): Flow<CatFemale?> =
+        catFemaleDao.observeById(id).map { it?.toDomain() }
+
     fun observeCatMales(): Flow<List<CatMale>> =
         catMaleDao.observeAll().map { list -> list.map { it.toDomain() } }
+
+    fun observeCatMale(id: Long): Flow<CatMale?> =
+        catMaleDao.observeById(id).map { it?.toDomain() }
 
     fun observeLitters(): Flow<List<Litter>> =
         litterDao.observeAll().map { list -> list.map { it.toDomain() } }
 
+    fun observeLitter(id: Long): Flow<Litter?> =
+        litterDao.observeById(id).map { it?.toDomain() }
+
+    fun observeLittersByMother(motherId: Long): Flow<List<Litter>> =
+        litterDao.observeByMotherId(motherId).map { list -> list.map { it.toDomain() } }
+
+    fun observeLittersByFather(fatherId: Long): Flow<List<Litter>> =
+        litterDao.observeByFatherId(fatherId).map { list -> list.map { it.toDomain() } }
+
     fun observeKittensByLitter(litterId: Long): Flow<List<Kitten>> =
         kittenDao.observeByLitterId(litterId).map { list -> list.map { it.toDomain() } }
+
+    fun observeKitten(id: Long): Flow<Kitten?> =
+        kittenDao.observeById(id).map { it?.toDomain() }
 
     fun observeReservations(): Flow<List<ReservationDetail>> =
         reservationDao.observeAll().map { list -> list.map { it.toDomain() } }
@@ -74,6 +92,30 @@ class LocalRepository(
                 reservationDao.upsertAll(items.map { it.toEntity() })
             }
         }
+    }
+
+    suspend fun upsertCatFemale(item: CatFemale) {
+        catFemaleDao.upsertAll(listOf(item.toEntity()))
+    }
+
+    suspend fun upsertCatMale(item: CatMale) {
+        catMaleDao.upsertAll(listOf(item.toEntity()))
+    }
+
+    suspend fun upsertLitter(item: Litter) {
+        litterDao.upsertAll(listOf(item.toEntity()))
+    }
+
+    suspend fun upsertLitters(items: List<Litter>) {
+        if (items.isNotEmpty()) litterDao.upsertAll(items.map { it.toEntity() })
+    }
+
+    suspend fun upsertKitten(item: Kitten) {
+        kittenDao.upsertAll(listOf(item.toEntity()))
+    }
+
+    suspend fun upsertKittens(items: List<Kitten>) {
+        if (items.isNotEmpty()) kittenDao.upsertAll(items.map { it.toEntity() })
     }
 
     suspend fun clearAll() {

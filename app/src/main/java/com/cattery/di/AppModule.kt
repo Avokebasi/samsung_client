@@ -9,7 +9,15 @@ import com.cattery.data.remote.repository.RemoteRepository
 import com.cattery.domain.usecases.AuthUseCases
 import com.cattery.domain.usecases.CatalogUseCases
 import com.cattery.presentation.viewmodels.AuthViewModel
+import com.cattery.presentation.viewmodels.CatFemaleDetailViewModel
+import com.cattery.presentation.viewmodels.CatFemaleListViewModel
+import com.cattery.presentation.viewmodels.CatMaleDetailViewModel
+import com.cattery.presentation.viewmodels.CatMaleListViewModel
 import com.cattery.presentation.viewmodels.HomeViewModel
+import com.cattery.presentation.viewmodels.KittenDetailViewModel
+import com.cattery.presentation.viewmodels.KittenListViewModel
+import com.cattery.presentation.viewmodels.LitterDetailViewModel
+import com.cattery.presentation.viewmodels.LitterListViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -36,4 +44,12 @@ val appModule = module {
 
     viewModel { AuthViewModel(get()) }
     viewModel { HomeViewModel(get()) }
+    viewModel { CatFemaleListViewModel(get()) }
+    viewModel { CatMaleListViewModel(get()) }
+    viewModel { LitterListViewModel(get()) }
+    viewModel { CatFemaleDetailViewModel(get(), get()) }
+    viewModel { CatMaleDetailViewModel(get(), get()) }
+    viewModel { LitterDetailViewModel(get(), get()) }
+    viewModel { KittenListViewModel(get(), get()) }
+    viewModel { KittenDetailViewModel(get(), get()) }
 }

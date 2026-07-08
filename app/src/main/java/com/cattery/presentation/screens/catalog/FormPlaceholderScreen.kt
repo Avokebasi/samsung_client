@@ -24,9 +24,8 @@ import com.cattery.presentation.theme.WhiteBackground
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CatalogPlaceholderScreen(
+fun FormPlaceholderScreen(
     title: String,
-    hintResId: Int = R.string.stage8_hint,
     onBack: () -> Unit,
 ) {
     Scaffold(
@@ -54,7 +53,7 @@ fun CatalogPlaceholderScreen(
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = stringResource(hintResId),
+                text = stringResource(R.string.stage7_hint),
                 style = MaterialTheme.typography.bodyLarge,
                 color = TextPrimary,
             )

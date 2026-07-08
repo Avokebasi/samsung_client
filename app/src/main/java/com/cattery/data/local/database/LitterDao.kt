@@ -18,6 +18,9 @@ interface LitterDao {
     @Query("SELECT * FROM litters WHERE motherId = :motherId ORDER BY birthDate DESC")
     fun observeByMotherId(motherId: Long): Flow<List<LitterEntity>>
 
+    @Query("SELECT * FROM litters WHERE fatherId = :fatherId ORDER BY birthDate DESC")
+    fun observeByFatherId(fatherId: Long): Flow<List<LitterEntity>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(items: List<LitterEntity>)
 
