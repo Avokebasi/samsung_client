@@ -48,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cattery.R
 import com.cattery.domain.models.KittenStatus
 import com.cattery.presentation.components.AvatarPickerDialog
+import com.cattery.presentation.components.FormDateField
 import com.cattery.presentation.components.FormTextField
 import com.cattery.presentation.components.PetPhoto
 import com.cattery.presentation.theme.BluePrimary
@@ -164,9 +165,9 @@ fun EntityFormScreen(
                         onValueChange = viewModel::updateName,
                         label = stringResource(R.string.field_name),
                     )
-                    FormTextField(
-                        value = uiState.birthDate,
-                        onValueChange = viewModel::updateBirthDate,
+                    FormDateField(
+                        isoValue = uiState.birthDate,
+                        onIsoValueChange = viewModel::updateBirthDate,
                         label = stringResource(R.string.field_birth_date),
                     )
                     when (uiState.entityType) {
@@ -187,9 +188,9 @@ fun EntityFormScreen(
                                 )
                             }
                             if (uiState.hadMating) {
-                                FormTextField(
-                                    value = uiState.matingDate,
-                                    onValueChange = viewModel::updateMatingDate,
+                                FormDateField(
+                                    isoValue = uiState.matingDate,
+                                    onIsoValueChange = viewModel::updateMatingDate,
                                     label = stringResource(R.string.field_mating_date),
                                 )
                             }

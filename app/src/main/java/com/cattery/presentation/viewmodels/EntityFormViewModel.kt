@@ -13,6 +13,7 @@ import com.cattery.domain.models.KittenStatus
 import com.cattery.domain.models.Litter
 import com.cattery.domain.usecases.CatalogUseCases
 import com.cattery.presentation.navigation.Routes
+import com.cattery.presentation.util.DateFormatter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -184,9 +185,15 @@ class EntityFormViewModel(
 
     fun save() {
         val state = _state.value
-        if (state.name.isBlank() || state.birthDate.isBlank()) {
+        val birthDate = DateFormatter.toIso(state.birthDate.trim()).orEmpty()
+        if (state.name.isBlank() || birthDate.isBlank()) {
             setError("Заполните кличку и дату рождения")
             return
+        }
+        val matingDate = if (state.hadMating) {
+            DateFormatter.toIso(state.matingDate.trim())
+        } else {
+            null
         }
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true, error = null) }
@@ -196,8 +203,8 @@ class EntityFormViewModel(
                     id,
                     SaveCatFemaleRequest(
                         name = state.name.trim(),
-                        birthDate = state.birthDate.trim(),
-                        matingDate = if (state.hadMating) state.matingDate.trim().ifBlank { null } else null,
+                        birthDate = birthDate,
+                        matingDate = matingDate,
                         photoUrls = state.photoUrls,
                     ),
                 )
@@ -205,7 +212,7 @@ class EntityFormViewModel(
                     id,
                     SaveCatMaleRequest(
                         name = state.name.trim(),
-                        birthDate = state.birthDate.trim(),
+                        birthDate = birthDate,
                         photoUrls = state.photoUrls,
                     ),
                 )
@@ -222,7 +229,7 @@ class EntityFormViewModel(
                         id,
                         SaveLitterRequest(
                             name = state.name.trim(),
-                            birthDate = state.birthDate.trim(),
+                            birthDate = birthDate,
                             totalCount = total,
                             maleCount = males,
                             femaleCount = females,
@@ -249,7 +256,7 @@ class EntityFormViewModel(
                         SaveKittenRequest(
                             litterId = litterId,
                             name = state.name.trim(),
-                            birthDate = state.birthDate.trim(),
+                            birthDate = birthDate,
                             color = state.color.trim(),
                             birthWeight = state.birthWeight.trim().toDoubleOrNull(),
                             status = state.status,

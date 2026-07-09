@@ -77,4 +77,6 @@
     <string name="form_tab_litter">Помёт</string>
     <string name="form_tab_kitten">Котёнок</string>
     <string name="form_universal_title">Добавить</string>
+    <string name="date_picker_confirm">Готово</string>
+    <string name="date_picker_cancel">Отмена</string>
 </resources>

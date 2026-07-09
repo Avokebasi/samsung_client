@@ -24,4 +24,19 @@ object DateFormatter {
             .atZone(ZoneId.systemDefault())
             .format(dateTimeFormat)
     }.getOrDefault("")
+
+    fun toIso(value: String): String? = runCatching {
+        when {
+            value.isBlank() -> null
+            value.contains('.') -> LocalDate.parse(value, displayFormat).toString()
+            else -> LocalDate.parse(value).toString()
+        }
+    }.getOrNull()
+
+    fun toEpochMillis(isoDate: String): Long? = runCatching {
+        LocalDate.parse(isoDate)
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+    }.getOrNull()
 }
