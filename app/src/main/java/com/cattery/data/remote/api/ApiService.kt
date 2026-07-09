@@ -22,6 +22,9 @@ import io.ktor.http.contentType
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class UpdateAvatarRequest(val avatarUrl: String)
+
+@Serializable
 data class LoginRequest(val username: String, val password: String)
 
 @Serializable
@@ -91,7 +94,8 @@ class ApiService(private val client: HttpClient) {
 
     suspend fun updateAvatar(avatarUrl: String): User =
         client.put("users/me/avatar") {
-            parameter("avatarUrl", avatarUrl)
+            contentType(ContentType.Application.Json)
+            setBody(UpdateAvatarRequest(avatarUrl))
         }.body()
 
     suspend fun logout() {

@@ -8,16 +8,19 @@ import com.cattery.domain.models.CatMale
 import com.cattery.domain.models.Litter
 import com.cattery.domain.models.User
 import com.cattery.domain.models.UserRole
+import com.cattery.data.local.images.ImageDataUrlEncoder
 import com.cattery.domain.usecases.AuthUseCases
 import com.cattery.domain.usecases.CatalogUseCases
 import com.cattery.domain.usecases.SyncUseCases
 import com.cattery.presentation.util.uiError
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class HomeUiState(
     val user: User? = null,
@@ -41,6 +44,7 @@ class HomeViewModel(
     private val catalogUseCases: CatalogUseCases,
     syncUseCases: SyncUseCases,
     private val authUseCases: AuthUseCases,
+    private val imageDataUrlEncoder: ImageDataUrlEncoder,
 ) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(true)
@@ -89,10 +93,16 @@ class HomeViewModel(
     }
 
     fun updateAvatar(uri: Uri) {
-        val uriString = uri.toString()
-        _localAvatarUri.value = uriString
         viewModelScope.launch {
-            catalogUseCases.updateAvatar(uriString)
+            val dataUrl = withContext(Dispatchers.IO) {
+                imageDataUrlEncoder.encode(uri)
+            }
+            if (dataUrl == null) {
+                _error.value = "Не удалось обработать фото"
+                return@launch
+            }
+            catalogUseCases.updateAvatar(dataUrl)
+                .onSuccess { _localAvatarUri.value = null }
                 .onFailure { _error.value = it.message }
         }
     }
