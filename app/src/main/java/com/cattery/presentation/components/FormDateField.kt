@@ -2,6 +2,7 @@ package com.cattery.presentation.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
@@ -9,6 +10,7 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -41,36 +43,44 @@ fun FormDateField(
     val displayValue = remember(isoValue) {
         if (isoValue.isBlank()) "" else DateFormatter.formatDisplay(isoValue)
     }
-    val interactionSource = remember { MutableInteractionSource() }
+    val openDialog = { showDialog = true }
 
-    OutlinedTextField(
-        value = displayValue,
-        onValueChange = {},
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-            ) { showDialog = true },
-        label = { Text(label) },
-        readOnly = true,
-        singleLine = true,
-        trailingIcon = {
-            Icon(
-                imageVector = Icons.Default.CalendarToday,
-                contentDescription = null,
-                tint = BluePrimary,
-            )
-        },
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = BluePrimary,
-            focusedLabelColor = BluePrimary,
-            cursorColor = BluePrimary,
-            focusedTextColor = TextPrimary,
-            unfocusedTextColor = TextPrimary,
-            unfocusedLabelColor = TextSecondary,
-        ),
-    )
+    Box(modifier = modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = displayValue,
+            onValueChange = {},
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(label) },
+            readOnly = true,
+            singleLine = true,
+            trailingIcon = {
+                IconButton(onClick = openDialog) {
+                    Icon(
+                        imageVector = Icons.Default.CalendarToday,
+                        contentDescription = null,
+                        tint = BluePrimary,
+                    )
+                }
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = BluePrimary,
+                focusedLabelColor = BluePrimary,
+                cursorColor = BluePrimary,
+                focusedTextColor = TextPrimary,
+                unfocusedTextColor = TextPrimary,
+                unfocusedLabelColor = TextSecondary,
+            ),
+        )
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = openDialog,
+                ),
+        )
+    }
 
     if (showDialog) {
         val initialMillis = remember(isoValue) {
