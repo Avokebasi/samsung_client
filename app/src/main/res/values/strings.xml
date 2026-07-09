@@ -69,4 +69,12 @@
     <string name="empty_reservations">Пока нет броней</string>
     <string name="reservation_buyer">Покупатель: %1$s</string>
     <string name="reservation_date">Дата: %1$s</string>
+    <string name="logout">Выйти</string>
+    <string name="no_mating">Вязки не было</string>
+    <string name="had_mating">Была вязка</string>
+    <string name="form_tab_cat_female">Кошка</string>
+    <string name="form_tab_cat_male">Кот</string>
+    <string name="form_tab_litter">Помёт</string>
+    <string name="form_tab_kitten">Котёнок</string>
+    <string name="form_universal_title">Добавить</string>
 </resources>

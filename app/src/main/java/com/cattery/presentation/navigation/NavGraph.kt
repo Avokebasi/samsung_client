@@ -101,6 +101,7 @@ fun CatteryNavGraph(
             composable(Routes.HOME) {
                 HomeScreen(
                     onNavigateToReservations = { navController.navigate(Routes.RESERVATIONS) },
+                    onNavigateToAddForm = { navController.navigate(Routes.form("cat_female")) },
                     onNavigateToCatFemales = { navController.navigate(Routes.CAT_FEMALES) },
                     onNavigateToCatMales = { navController.navigate(Routes.CAT_MALES) },
                     onNavigateToLitters = { navController.navigate(Routes.LITTERS) },
@@ -109,6 +110,11 @@ fun CatteryNavGraph(
                             "female" -> navController.navigate(Routes.catFemaleDetail(id))
                             "male" -> navController.navigate(Routes.catMaleDetail(id))
                             "litter" -> navController.navigate(Routes.litterDetail(id))
+                        }
+                    },
+                    onLogout = {
+                        navController.navigate(Routes.LOGIN) {
+                            popUpTo(0) { inclusive = true }
                         }
                     },
                 )
@@ -210,18 +216,21 @@ fun CatteryNavGraph(
             ) { backStackEntry ->
                 val entityType = backStackEntry.arguments?.getString("entityType").orEmpty()
                 val entityId = backStackEntry.arguments?.getLong("entityId") ?: Routes.NO_ID
+                val presetLitterId = backStackEntry.arguments?.getLong("litterId") ?: Routes.NO_ID
                 val isEdit = entityId != Routes.NO_ID
-                val title = when (entityType) {
-                    "cat_female" -> stringResource(
+                val allowTypeSwitch = !isEdit && presetLitterId == Routes.NO_ID
+                val title = when {
+                    allowTypeSwitch -> stringResource(R.string.form_universal_title)
+                    entityType == "cat_female" -> stringResource(
                         if (isEdit) R.string.form_edit_cat_female else R.string.form_add_cat_female,
                     )
-                    "cat_male" -> stringResource(
+                    entityType == "cat_male" -> stringResource(
                         if (isEdit) R.string.form_edit_cat_male else R.string.form_add_cat_male,
                     )
-                    "litter" -> stringResource(
+                    entityType == "litter" -> stringResource(
                         if (isEdit) R.string.form_edit_litter else R.string.form_add_litter,
                     )
-                    "kitten" -> stringResource(
+                    entityType == "kitten" -> stringResource(
                         if (isEdit) R.string.form_edit_kitten else R.string.form_add_kitten,
                     )
                     else -> stringResource(R.string.add)
@@ -230,6 +239,14 @@ fun CatteryNavGraph(
                     title = title,
                     onBack = { navController.popBackStack() },
                     onCompleted = { navController.popBackStack() },
+                    allowTypeSwitch = allowTypeSwitch,
+                    onTypeSwitch = { newType ->
+                        if (newType != entityType) {
+                            navController.navigate(Routes.form(newType)) {
+                                popUpTo(Routes.form(entityType)) { inclusive = true }
+                            }
+                        }
+                    },
                 )
             }
         }

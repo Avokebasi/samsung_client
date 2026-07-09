@@ -8,6 +8,7 @@ import com.cattery.domain.models.CatMale
 import com.cattery.domain.models.Litter
 import com.cattery.domain.models.User
 import com.cattery.domain.models.UserRole
+import com.cattery.domain.usecases.AuthUseCases
 import com.cattery.domain.usecases.CatalogUseCases
 import com.cattery.domain.usecases.SyncUseCases
 import com.cattery.presentation.util.uiError
@@ -39,6 +40,7 @@ data class HomeUiState(
 class HomeViewModel(
     private val catalogUseCases: CatalogUseCases,
     syncUseCases: SyncUseCases,
+    private val authUseCases: AuthUseCases,
 ) : ViewModel() {
 
     private val _isLoading = MutableStateFlow(true)
@@ -92,6 +94,13 @@ class HomeViewModel(
         viewModelScope.launch {
             catalogUseCases.updateAvatar(uriString)
                 .onFailure { _error.value = it.message }
+        }
+    }
+
+    fun logout(onLoggedOut: () -> Unit) {
+        viewModelScope.launch {
+            authUseCases.logout()
+            onLoggedOut()
         }
     }
 }

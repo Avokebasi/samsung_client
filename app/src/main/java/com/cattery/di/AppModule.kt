@@ -70,7 +70,7 @@ val appModule = module {
 
     viewModel { SplashViewModel(get(), get(), get()) }
     viewModel { AuthViewModel(get()) }
-    viewModel { HomeViewModel(get(), get()) }
+    viewModel { HomeViewModel(get(), get(), get()) }
     viewModel { CatFemaleListViewModel(get()) }
     viewModel { CatMaleListViewModel(get()) }
     viewModel { LitterListViewModel(get()) }

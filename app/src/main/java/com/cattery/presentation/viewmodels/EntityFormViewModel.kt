@@ -28,6 +28,7 @@ data class EntityFormUiState(
     val isSaving: Boolean = false,
     val name: String = "",
     val birthDate: String = "",
+    val hadMating: Boolean = false,
     val matingDate: String = "",
     val color: String = "",
     val birthWeight: String = "",
@@ -107,6 +108,7 @@ class EntityFormViewModel(
             it.copy(
                 name = cat.name,
                 birthDate = cat.birthDate,
+                hadMating = cat.matingDate != null,
                 matingDate = cat.matingDate.orEmpty(),
                 photoUrls = cat.photoUrls,
             )
@@ -158,6 +160,9 @@ class EntityFormViewModel(
 
     fun updateName(value: String) = _state.update { it.copy(name = value, error = null) }
     fun updateBirthDate(value: String) = _state.update { it.copy(birthDate = value, error = null) }
+    fun updateHadMating(value: Boolean) = _state.update {
+        it.copy(hadMating = value, matingDate = if (value) it.matingDate else "", error = null)
+    }
     fun updateMatingDate(value: String) = _state.update { it.copy(matingDate = value, error = null) }
     fun updateColor(value: String) = _state.update { it.copy(color = value, error = null) }
     fun updateBirthWeight(value: String) = _state.update { it.copy(birthWeight = value, error = null) }
@@ -192,7 +197,7 @@ class EntityFormViewModel(
                     SaveCatFemaleRequest(
                         name = state.name.trim(),
                         birthDate = state.birthDate.trim(),
-                        matingDate = state.matingDate.trim().ifBlank { null },
+                        matingDate = if (state.hadMating) state.matingDate.trim().ifBlank { null } else null,
                         photoUrls = state.photoUrls,
                     ),
                 )

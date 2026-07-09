@@ -21,6 +21,7 @@ import com.cattery.R
 import com.cattery.presentation.components.CatalogEmptyState
 import com.cattery.presentation.components.CatalogScaffold
 import com.cattery.presentation.components.CatalogSearchField
+import com.cattery.presentation.components.RefreshableContent
 import com.cattery.presentation.components.ReservationListItem
 import com.cattery.presentation.theme.BluePrimary
 import com.cattery.presentation.viewmodels.ReservationsViewModel
@@ -43,12 +44,16 @@ fun ReservationsScreen(
         addLabel = "",
         onAdd = {},
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp),
+        RefreshableContent(
+            isRefreshing = uiState.isLoading && uiState.items.isNotEmpty(),
+            onRefresh = viewModel::refresh,
+            modifier = Modifier.padding(padding),
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+            ) {
             CatalogSearchField(
                 query = uiState.query,
                 onQueryChange = viewModel::onQueryChange,
@@ -90,6 +95,7 @@ fun ReservationsScreen(
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
+            }
             }
         }
     }

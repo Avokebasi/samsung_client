@@ -22,6 +22,7 @@ import com.cattery.presentation.components.CatalogEmptyState
 import com.cattery.presentation.components.CatalogListItem
 import com.cattery.presentation.components.CatalogScaffold
 import com.cattery.presentation.components.CatalogSearchField
+import com.cattery.presentation.components.RefreshableContent
 import com.cattery.presentation.theme.BluePrimary
 import com.cattery.presentation.viewmodels.CatalogListUiState
 import com.cattery.presentation.viewmodels.CatFemaleListViewModel
@@ -46,6 +47,8 @@ fun CatFemaleListScreen(
         onQueryChange = viewModel::onQueryChange,
         onItemClick = onItemClick,
         onAdd = onAdd,
+        isRefreshing = uiState.isLoading && uiState.items.isNotEmpty(),
+        onRefresh = viewModel::refresh,
     )
 }
 
@@ -65,6 +68,8 @@ fun CatMaleListScreen(
         onQueryChange = viewModel::onQueryChange,
         onItemClick = onItemClick,
         onAdd = onAdd,
+        isRefreshing = uiState.isLoading && uiState.items.isNotEmpty(),
+        onRefresh = viewModel::refresh,
     )
 }
 
@@ -84,6 +89,8 @@ fun LitterListScreen(
         onQueryChange = viewModel::onQueryChange,
         onItemClick = onItemClick,
         onAdd = onAdd,
+        isRefreshing = uiState.isLoading && uiState.items.isNotEmpty(),
+        onRefresh = viewModel::refresh,
     )
 }
 
@@ -103,6 +110,8 @@ fun KittenListScreen(
         onQueryChange = viewModel::onQueryChange,
         onItemClick = onItemClick,
         onAdd = onAdd,
+        isRefreshing = uiState.isLoading && uiState.items.isNotEmpty(),
+        onRefresh = viewModel::refresh,
     )
 }
 
@@ -115,6 +124,8 @@ private fun CatalogListContent(
     onQueryChange: (String) -> Unit,
     onItemClick: (Long) -> Unit,
     onAdd: () -> Unit,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
 ) {
     CatalogScaffold(
         title = title,
@@ -123,12 +134,16 @@ private fun CatalogListContent(
         addLabel = stringResource(R.string.add),
         onAdd = onAdd,
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp),
+        RefreshableContent(
+            isRefreshing = isRefreshing,
+            onRefresh = onRefresh,
+            modifier = Modifier.padding(padding),
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+            ) {
             CatalogSearchField(
                 query = uiState.query,
                 onQueryChange = onQueryChange,
@@ -171,6 +186,7 @@ private fun CatalogListContent(
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
+            }
             }
         }
     }

@@ -27,6 +27,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -59,6 +63,8 @@ fun EntityFormScreen(
     title: String,
     onBack: () -> Unit,
     onCompleted: () -> Unit,
+    allowTypeSwitch: Boolean = false,
+    onTypeSwitch: (String) -> Unit = {},
     viewModel: EntityFormViewModel = koinViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -147,6 +153,12 @@ fun EntityFormScreen(
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
+                    if (allowTypeSwitch) {
+                        FormTypeTabs(
+                            selectedType = uiState.entityType,
+                            onTypeSelected = onTypeSwitch,
+                        )
+                    }
                     FormTextField(
                         value = uiState.name,
                         onValueChange = viewModel::updateName,
@@ -159,11 +171,28 @@ fun EntityFormScreen(
                     )
                     when (uiState.entityType) {
                         "cat_female" -> {
-                            FormTextField(
-                                value = uiState.matingDate,
-                                onValueChange = viewModel::updateMatingDate,
-                                label = stringResource(R.string.field_mating_date),
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.had_mating),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = TextPrimary,
+                                )
+                                Switch(
+                                    checked = uiState.hadMating,
+                                    onCheckedChange = viewModel::updateHadMating,
+                                )
+                            }
+                            if (uiState.hadMating) {
+                                FormTextField(
+                                    value = uiState.matingDate,
+                                    onValueChange = viewModel::updateMatingDate,
+                                    label = stringResource(R.string.field_mating_date),
+                                )
+                            }
                         }
                         "litter" -> {
                             FormTextField(
@@ -254,6 +283,36 @@ fun EntityFormScreen(
                         CircularProgressIndicator(color = BluePrimary)
                     }
                 }
+            }
+        }
+    }
+}
+
+private data class FormTypeOption(
+    val type: String,
+    val labelRes: Int,
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FormTypeTabs(
+    selectedType: String,
+    onTypeSelected: (String) -> Unit,
+) {
+    val options = listOf(
+        FormTypeOption("cat_female", R.string.form_tab_cat_female),
+        FormTypeOption("cat_male", R.string.form_tab_cat_male),
+        FormTypeOption("litter", R.string.form_tab_litter),
+        FormTypeOption("kitten", R.string.form_tab_kitten),
+    )
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        options.forEachIndexed { index, option ->
+            SegmentedButton(
+                shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+                onClick = { onTypeSelected(option.type) },
+                selected = selectedType == option.type,
+            ) {
+                Text(stringResource(option.labelRes))
             }
         }
     }

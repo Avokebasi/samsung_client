@@ -74,7 +74,10 @@ fun CatFemaleDetailScreen(
                         label = stringResource(R.string.field_mating_date),
                         value = DateFormatter.formatDisplay(matingDate),
                     )
-                }
+                } ?: DetailField(
+                    label = stringResource(R.string.field_mating_date),
+                    value = stringResource(R.string.no_mating),
+                )
                 female.birthDueDate?.let { dueDate ->
                     DetailField(
                         label = stringResource(R.string.field_birth_due_date),

@@ -16,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,6 +33,7 @@ import com.cattery.presentation.components.AvatarPickerDialog
 import com.cattery.presentation.components.HomeSectionHeader
 import com.cattery.presentation.components.LastSyncLabel
 import com.cattery.presentation.components.PetScrollCard
+import com.cattery.presentation.components.RefreshableContent
 import com.cattery.presentation.components.UserAvatar
 import com.cattery.presentation.components.litterSubtitle
 import com.cattery.presentation.components.petAgeSubtitle
@@ -46,10 +48,12 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun HomeScreen(
     onNavigateToReservations: () -> Unit,
+    onNavigateToAddForm: () -> Unit,
     onNavigateToCatFemales: () -> Unit,
     onNavigateToCatMales: () -> Unit,
     onNavigateToLitters: () -> Unit,
     onPetClick: (String, Long) -> Unit,
+    onLogout: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -78,39 +82,57 @@ fun HomeScreen(
         return
     }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(20.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+    RefreshableContent(
+        isRefreshing = uiState.isSyncing,
+        onRefresh = viewModel::refresh,
     ) {
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Button(
-                    onClick = onNavigateToReservations,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = BluePrimary,
-                        contentColor = WhiteBackground,
-                    ),
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+        ) {
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Text(
-                        stringResource(
-                            if (uiState.isBreeder) R.string.reservations else R.string.my_reservations,
+                    Button(
+                        onClick = onNavigateToReservations,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = BluePrimary,
+                            contentColor = WhiteBackground,
                         ),
+                    ) {
+                        Text(
+                            stringResource(
+                                if (uiState.isBreeder) R.string.reservations else R.string.my_reservations,
+                            ),
+                        )
+                    }
+                    if (uiState.isBreeder) {
+                        OutlinedButton(onClick = onNavigateToAddForm) {
+                            Text(stringResource(R.string.add))
+                        }
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    UserAvatar(
+                        avatarUrl = uiState.user?.avatarUrl,
+                        localUri = uiState.localAvatarUri,
+                        onClick = { showAvatarPicker = true },
+                        size = 52.dp,
                     )
                 }
-                Spacer(modifier = Modifier.weight(1f))
-                UserAvatar(
-                    avatarUrl = uiState.user?.avatarUrl,
-                    localUri = uiState.localAvatarUri,
-                    onClick = { showAvatarPicker = true },
-                    size = 52.dp,
-                )
             }
-        }
+
+            item {
+                OutlinedButton(
+                    onClick = { viewModel.logout(onLogout) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(stringResource(R.string.logout))
+                }
+            }
 
         if (uiState.lastSyncMillis > 0L) {
             item {
@@ -209,6 +231,7 @@ fun HomeScreen(
                     color = MaterialTheme.colorScheme.error,
                 )
             }
+        }
         }
     }
 }

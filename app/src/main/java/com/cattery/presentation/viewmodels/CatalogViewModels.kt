@@ -421,6 +421,10 @@ class KittenListViewModel(
         _query.value = query
     }
 
+    fun refresh() {
+        load()
+    }
+
     private fun load() {
         viewModelScope.launch {
             _isLoading.value = true
