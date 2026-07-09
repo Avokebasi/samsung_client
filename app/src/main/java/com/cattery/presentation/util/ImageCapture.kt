@@ -36,7 +36,9 @@ fun rememberImageCaptureHandlers(
         contract = ActivityResultContracts.TakePicture(),
     ) { success ->
         if (success) {
-            pendingCameraUri?.let { onImageCapturedState(it) }
+            pendingCameraUri?.let { uri ->
+                persistPickedImage(context, uri)?.let { onImageCapturedState(it) }
+            }
         }
         pendingCameraUri = null
     }
@@ -54,13 +56,17 @@ fun rememberImageCaptureHandlers(
     val pickVisualMediaLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
     ) { uri ->
-        if (uri != null) onImageCapturedState(uri)
+        if (uri != null) {
+            persistPickedImage(context, uri)?.let { onImageCapturedState(it) }
+        }
     }
 
     val getContentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
     ) { uri ->
-        if (uri != null) onImageCapturedState(uri)
+        if (uri != null) {
+            persistPickedImage(context, uri)?.let { onImageCapturedState(it) }
+        }
     }
 
     val readImagesPermissionLauncher = rememberLauncherForActivityResult(
@@ -117,3 +123,12 @@ private fun createCameraImageUri(context: Context): Uri {
         file,
     )
 }
+
+private fun persistPickedImage(context: Context, uri: Uri): Uri? = runCatching {
+    val directory = File(context.cacheDir, "images").apply { mkdirs() }
+    val file = File(directory, "picked_${System.currentTimeMillis()}.jpg")
+    context.contentResolver.openInputStream(uri)?.use { input ->
+        file.outputStream().use { output -> input.copyTo(output) }
+    } ?: return null
+    Uri.fromFile(file)
+}.getOrNull()

@@ -6,35 +6,46 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Base64
 import java.io.ByteArrayOutputStream
+import java.io.File
 import kotlin.math.max
 
 class ImageDataUrlEncoder(
     private val context: Context,
 ) {
-    fun encode(uri: Uri, maxSidePx: Int = 512, quality: Int = 85): String? = runCatching {
+    fun encode(uri: Uri, maxSidePx: Int = 512, quality: Int = 85): String? {
+        val bytes = readBytes(uri) ?: return null
+        if (bytes.isEmpty()) return null
+
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        context.contentResolver.openInputStream(uri)?.use {
-            BitmapFactory.decodeStream(it, null, bounds)
-        } ?: return null
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
 
         val sampleSize = calculateSampleSize(bounds.outWidth, bounds.outHeight, maxSidePx)
         val options = BitmapFactory.Options().apply { inSampleSize = sampleSize }
-        val bitmap = context.contentResolver.openInputStream(uri)?.use {
-            BitmapFactory.decodeStream(it, null, options)
-        } ?: return null
+        val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options) ?: return null
 
         val scaled = scaleBitmap(bitmap, maxSidePx)
         if (scaled !== bitmap) {
             bitmap.recycle()
         }
 
-        ByteArrayOutputStream().use { output ->
-            scaled.compress(Bitmap.CompressFormat.JPEG, quality, output)
-            scaled.recycle()
-            val base64 = Base64.encodeToString(output.toByteArray(), Base64.NO_WRAP)
-            "data:image/jpeg;base64,$base64"
+        val output = ByteArrayOutputStream()
+        scaled.compress(Bitmap.CompressFormat.JPEG, quality, output)
+        scaled.recycle()
+
+        val base64 = Base64.encodeToString(output.toByteArray(), Base64.NO_WRAP)
+        return "data:image/jpeg;base64,$base64"
+    }
+
+    private fun readBytes(uri: Uri): ByteArray? {
+        if (uri.scheme == "file") {
+            val path = uri.path ?: return null
+            val file = File(path)
+            if (!file.exists()) return null
+            return file.readBytes()
         }
-    }.getOrNull()
+        return context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+    }
 
     private fun calculateSampleSize(width: Int, height: Int, maxSide: Int): Int {
         var size = 1
