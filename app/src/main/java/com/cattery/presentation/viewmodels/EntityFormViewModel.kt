@@ -1,8 +1,11 @@
 package com.cattery.presentation.viewmodels
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cattery.data.local.images.ImageDataUrlEncoder
+import com.cattery.data.local.images.LocalPhotoStore
 import com.cattery.data.remote.api.SaveCatFemaleRequest
 import com.cattery.data.remote.api.SaveCatMaleRequest
 import com.cattery.data.remote.api.SaveKittenRequest
@@ -14,6 +17,7 @@ import com.cattery.domain.models.Litter
 import com.cattery.domain.usecases.CatalogUseCases
 import com.cattery.presentation.navigation.Routes
 import com.cattery.presentation.util.DateFormatter
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +25,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class EntityFormUiState(
     val entityType: String = "",
@@ -50,6 +55,8 @@ data class EntityFormUiState(
 
 class EntityFormViewModel(
     private val catalogUseCases: CatalogUseCases,
+    private val photoStore: LocalPhotoStore,
+    private val imageDataUrlEncoder: ImageDataUrlEncoder,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val entityType: String = savedStateHandle.get<String>("entityType").orEmpty()
@@ -175,8 +182,17 @@ class EntityFormViewModel(
     fun updateLitterId(value: Long?) = _state.update { it.copy(litterId = value, error = null) }
     fun updateStatus(value: KittenStatus) = _state.update { it.copy(status = value, error = null) }
 
-    fun addPhoto(url: String) {
-        _state.update { it.copy(photoUrls = it.photoUrls + url, error = null) }
+    fun addPhoto(uri: Uri) {
+        viewModelScope.launch {
+            val path = withContext(Dispatchers.IO) {
+                photoStore.saveFromUri(uri, imageDataUrlEncoder)
+            }
+            if (path == null) {
+                setError("Не удалось обработать фото")
+                return@launch
+            }
+            _state.update { it.copy(photoUrls = it.photoUrls + path, error = null) }
+        }
     }
 
     fun removePhoto(url: String) {
@@ -197,6 +213,9 @@ class EntityFormViewModel(
         }
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true, error = null) }
+            val photoUrls = withContext(Dispatchers.IO) {
+                photoStore.toDataUrls(state.photoUrls)
+            }
             val id = entityId.takeIf { it != Routes.NO_ID }
             val result = when (entityType) {
                 "cat_female" -> catalogUseCases.saveCatFemale(
@@ -205,7 +224,7 @@ class EntityFormViewModel(
                         name = state.name.trim(),
                         birthDate = birthDate,
                         matingDate = matingDate,
-                        photoUrls = state.photoUrls,
+                        photoUrls = photoUrls,
                     ),
                 )
                 "cat_male" -> catalogUseCases.saveCatMale(
@@ -213,7 +232,7 @@ class EntityFormViewModel(
                     SaveCatMaleRequest(
                         name = state.name.trim(),
                         birthDate = birthDate,
-                        photoUrls = state.photoUrls,
+                        photoUrls = photoUrls,
                     ),
                 )
                 "litter" -> {
@@ -235,7 +254,7 @@ class EntityFormViewModel(
                             femaleCount = females,
                             motherId = state.motherId,
                             fatherId = state.fatherId,
-                            photoUrls = state.photoUrls,
+                            photoUrls = photoUrls,
                         ),
                     )
                 }
@@ -260,7 +279,7 @@ class EntityFormViewModel(
                             color = state.color.trim(),
                             birthWeight = state.birthWeight.trim().toDoubleOrNull(),
                             status = state.status,
-                            photoUrls = state.photoUrls,
+                            photoUrls = photoUrls,
                         ),
                     )
                 }

@@ -13,6 +13,12 @@ class ImageDataUrlEncoder(
     private val context: Context,
 ) {
     fun encode(uri: Uri, maxSidePx: Int = 512, quality: Int = 85): String? {
+        val jpeg = encodeToJpegBytes(uri, maxSidePx, quality) ?: return null
+        val base64 = Base64.encodeToString(jpeg, Base64.NO_WRAP)
+        return "data:image/jpeg;base64,$base64"
+    }
+
+    fun encodeToJpegBytes(uri: Uri, maxSidePx: Int = 512, quality: Int = 85): ByteArray? {
         val bytes = readBytes(uri) ?: return null
         if (bytes.isEmpty()) return null
 
@@ -33,9 +39,22 @@ class ImageDataUrlEncoder(
         scaled.compress(Bitmap.CompressFormat.JPEG, quality, output)
         scaled.recycle()
 
-        val base64 = Base64.encodeToString(output.toByteArray(), Base64.NO_WRAP)
-        return "data:image/jpeg;base64,$base64"
+        return output.toByteArray()
     }
+
+    fun encodePhotoUrl(url: String, maxSidePx: Int = 512): String? {
+        if (url.startsWith("data:image")) return url
+        if (url.startsWith("file://") || url.startsWith("content://")) {
+            return encode(Uri.parse(url), maxSidePx = maxSidePx)
+        }
+        if (File(url).exists()) {
+            return encode(Uri.fromFile(File(url)), maxSidePx = maxSidePx)
+        }
+        return url.takeIf { it.startsWith("http") }
+    }
+
+    fun encodePhotoUrls(urls: List<String>, maxSidePx: Int = 512): List<String> =
+        urls.mapNotNull { encodePhotoUrl(it, maxSidePx) }
 
     private fun readBytes(uri: Uri): ByteArray? {
         if (uri.scheme == "file") {

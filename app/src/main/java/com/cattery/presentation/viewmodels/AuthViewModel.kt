@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cattery.domain.models.UserRole
 import com.cattery.domain.usecases.AuthUseCases
+import com.cattery.presentation.util.userMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,7 +31,10 @@ class AuthViewModel(
                 .onSuccess { _uiState.update { it.copy(isLoading = false, isSuccess = true) } }
                 .onFailure { e ->
                     _uiState.update {
-                        it.copy(isLoading = false, error = e.message ?: "Ошибка входа")
+                        it.copy(
+                            isLoading = false,
+                            error = e.userMessage("Ошибка входа"),
+                        )
                     }
                 }
         }
@@ -43,7 +47,10 @@ class AuthViewModel(
                 .onSuccess { _uiState.update { it.copy(isLoading = false, isSuccess = true) } }
                 .onFailure { e ->
                     _uiState.update {
-                        it.copy(isLoading = false, error = e.message ?: "Ошибка регистрации")
+                        it.copy(
+                            isLoading = false,
+                            error = e.userMessage("Ошибка регистрации"),
+                        )
                     }
                 }
         }

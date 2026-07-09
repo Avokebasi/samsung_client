@@ -2,6 +2,7 @@ package com.cattery.di
 
 import com.cattery.data.local.database.AppDatabase
 import com.cattery.data.local.images.ImageDataUrlEncoder
+import com.cattery.data.local.images.LocalPhotoStore
 import com.cattery.data.local.datastore.SyncStore
 import com.cattery.data.local.datastore.TokenManager
 import com.cattery.data.local.network.NetworkMonitor
@@ -39,8 +40,9 @@ val appModule = module {
     single { TokenManager(androidContext()) }
     single { SyncStore(androidContext()) }
     single { NetworkMonitor(androidContext()) }
-    single { LocalRepository(get()) }
+    single { LocalPhotoStore(androidContext()) }
     single { ImageDataUrlEncoder(androidContext()) }
+    single { LocalRepository(get(), get()) }
 
     single(named("appScope")) { CoroutineScope(SupervisorJob() + Dispatchers.Default) }
 
@@ -81,6 +83,6 @@ val appModule = module {
     viewModel { LitterDetailViewModel(get(), get()) }
     viewModel { KittenListViewModel(get(), get()) }
     viewModel { KittenDetailViewModel(get(), get()) }
-    viewModel { EntityFormViewModel(get(), get()) }
+    viewModel { EntityFormViewModel(get(), get(), get(), get()) }
     viewModel { ReservationsViewModel(get()) }
 }

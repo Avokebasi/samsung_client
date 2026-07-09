@@ -6,13 +6,26 @@ import java.time.temporal.ChronoUnit
 
 object AgeFormatter {
     fun format(birthDate: String): String = runCatching {
-        val birth = LocalDate.parse(birthDate)
+        val iso = DateFormatter.toIso(birthDate.trim()) ?: birthDate.trim()
+        val birth = LocalDate.parse(iso)
         val today = LocalDate.now()
+        if (birth.isAfter(today)) return@runCatching ""
         val period = Period.between(birth, today)
-        when {
-            period.years > 0 -> "${period.years} г."
-            period.months > 0 -> "${period.months} мес."
-            else -> "${ChronoUnit.DAYS.between(birth, today)} дн."
+        buildString {
+            when {
+                period.years > 0 -> {
+                    append("${period.years} г.")
+                    if (period.months > 0) append(" ${period.months} мес.")
+                }
+                period.months > 0 -> {
+                    append("${period.months} мес.")
+                    if (period.days > 0) append(" ${period.days} дн.")
+                }
+                else -> {
+                    val days = ChronoUnit.DAYS.between(birth, today).coerceAtLeast(0)
+                    append("$days дн.")
+                }
+            }
         }
     }.getOrDefault("")
 }

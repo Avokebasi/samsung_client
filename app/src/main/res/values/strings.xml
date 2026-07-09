@@ -37,13 +37,14 @@
     <string name="empty_kittens">Пока нет котят</string>
     <string name="kitten_detail">Котёнок</string>
     <string name="field_name">Кличка</string>
+    <string name="field_litter_name">Название</string>
     <string name="field_birth_date">Дата рождения</string>
     <string name="field_age">Возраст</string>
     <string name="field_mating_date">Дата случки</string>
     <string name="field_birth_due_date">Ожидаемая дата родов</string>
     <string name="field_total_count">Всего</string>
-    <string name="field_male_count">Котят</string>
-    <string name="field_female_count">Кошек</string>
+    <string name="field_male_count">Мальчики</string>
+    <string name="field_female_count">Девочки</string>
     <string name="field_color">Окрас</string>
     <string name="field_birth_weight">Вес при рождении</string>
     <string name="field_status">Статус</string>
@@ -55,6 +56,9 @@
     <string name="weight_unit">г</string>
     <string name="save">Сохранить</string>
     <string name="delete">Удалить</string>
+    <string name="delete_confirm_title">Удалить запись?</string>
+    <string name="delete_confirm_message">Это действие нельзя отменить.</string>
+    <string name="cancel">Отмена</string>
     <string name="photos">Фото</string>
     <string name="add_photo">Добавить фото</string>
     <string name="not_selected">Не выбрано</string>

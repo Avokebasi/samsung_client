@@ -11,6 +11,7 @@ import com.cattery.domain.models.KittenStatus
 import com.cattery.domain.models.Litter
 import com.cattery.domain.models.UserRole
 import com.cattery.domain.usecases.CatalogUseCases
+import com.cattery.presentation.components.petAgeSubtitle
 import com.cattery.presentation.util.uiError
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,7 +66,7 @@ class CatFemaleListViewModel(
                 CatalogListItemData(
                     id = it.id,
                     name = it.name,
-                    subtitle = it.birthDate,
+                    subtitle = petAgeSubtitle(it.birthDate),
                     photoUrl = it.photoUrls.firstOrNull(),
                 )
             },
@@ -132,7 +133,7 @@ class CatMaleListViewModel(
                 CatalogListItemData(
                     id = it.id,
                     name = it.name,
-                    subtitle = it.birthDate,
+                    subtitle = petAgeSubtitle(it.birthDate),
                     photoUrl = it.photoUrls.firstOrNull(),
                 )
             },
@@ -199,7 +200,7 @@ class LitterListViewModel(
                 CatalogListItemData(
                     id = it.id,
                     name = it.name,
-                    subtitle = it.birthDate,
+                    subtitle = petAgeSubtitle(it.birthDate),
                     photoUrl = it.photoUrls.firstOrNull(),
                 )
             },
@@ -241,7 +242,9 @@ data class CatFemaleDetailUiState(
     val cat: CatFemale? = null,
     val litters: List<Litter> = emptyList(),
     val isLoading: Boolean = true,
+    val isDeleting: Boolean = false,
     val isBreeder: Boolean = false,
+    val deleted: Boolean = false,
     val error: String? = null,
 )
 
@@ -251,20 +254,31 @@ class CatFemaleDetailViewModel(
 ) : ViewModel() {
     private val catId: Long = savedStateHandle.get<Long>("id") ?: 0L
     private val _isLoading = MutableStateFlow(true)
+    private val _isDeleting = MutableStateFlow(false)
+    private val _deleted = MutableStateFlow(false)
     private val _error = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<CatFemaleDetailUiState> = combine(
-        catalogUseCases.observeCatFemale(catId),
-        catalogUseCases.observeLittersByMother(catId),
-        catalogUseCases.observeCurrentUser(),
+        combine(
+            catalogUseCases.observeCatFemale(catId),
+            catalogUseCases.observeLittersByMother(catId),
+            catalogUseCases.observeCurrentUser(),
+        ) { cat, litters, user ->
+            Triple(cat, litters, user)
+        },
         _isLoading,
+        _isDeleting,
+        _deleted,
         _error,
-    ) { cat, litters, user, loading, error ->
+    ) { data, loading, deleting, deleted, error ->
+        val (cat, litters, user) = data
         CatFemaleDetailUiState(
             cat = cat,
             litters = litters,
             isLoading = loading,
+            isDeleting = deleting,
             isBreeder = user?.role == UserRole.BREEDER,
+            deleted = deleted,
             error = error,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CatFemaleDetailUiState())
@@ -283,13 +297,26 @@ class CatFemaleDetailViewModel(
             _isLoading.value = false
         }
     }
+
+    fun delete() {
+        viewModelScope.launch {
+            _isDeleting.value = true
+            _error.value = null
+            catalogUseCases.deleteCatFemale(catId)
+                .onSuccess { _deleted.value = true }
+                .onFailure { _error.value = it.message }
+            _isDeleting.value = false
+        }
+    }
 }
 
 data class CatMaleDetailUiState(
     val cat: CatMale? = null,
     val litters: List<Litter> = emptyList(),
     val isLoading: Boolean = true,
+    val isDeleting: Boolean = false,
     val isBreeder: Boolean = false,
+    val deleted: Boolean = false,
     val error: String? = null,
 )
 
@@ -299,20 +326,31 @@ class CatMaleDetailViewModel(
 ) : ViewModel() {
     private val catId: Long = savedStateHandle.get<Long>("id") ?: 0L
     private val _isLoading = MutableStateFlow(true)
+    private val _isDeleting = MutableStateFlow(false)
+    private val _deleted = MutableStateFlow(false)
     private val _error = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<CatMaleDetailUiState> = combine(
-        catalogUseCases.observeCatMale(catId),
-        catalogUseCases.observeLittersByFather(catId),
-        catalogUseCases.observeCurrentUser(),
+        combine(
+            catalogUseCases.observeCatMale(catId),
+            catalogUseCases.observeLittersByFather(catId),
+            catalogUseCases.observeCurrentUser(),
+        ) { cat, litters, user ->
+            Triple(cat, litters, user)
+        },
         _isLoading,
+        _isDeleting,
+        _deleted,
         _error,
-    ) { cat, litters, user, loading, error ->
+    ) { data, loading, deleting, deleted, error ->
+        val (cat, litters, user) = data
         CatMaleDetailUiState(
             cat = cat,
             litters = litters,
             isLoading = loading,
+            isDeleting = deleting,
             isBreeder = user?.role == UserRole.BREEDER,
+            deleted = deleted,
             error = error,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CatMaleDetailUiState())
@@ -331,12 +369,25 @@ class CatMaleDetailViewModel(
             _isLoading.value = false
         }
     }
+
+    fun delete() {
+        viewModelScope.launch {
+            _isDeleting.value = true
+            _error.value = null
+            catalogUseCases.deleteCatMale(catId)
+                .onSuccess { _deleted.value = true }
+                .onFailure { _error.value = it.message }
+            _isDeleting.value = false
+        }
+    }
 }
 
 data class LitterDetailUiState(
     val litter: Litter? = null,
     val isLoading: Boolean = true,
+    val isDeleting: Boolean = false,
     val isBreeder: Boolean = false,
+    val deleted: Boolean = false,
     val error: String? = null,
 )
 
@@ -346,18 +397,29 @@ class LitterDetailViewModel(
 ) : ViewModel() {
     private val litterId: Long = savedStateHandle.get<Long>("id") ?: 0L
     private val _isLoading = MutableStateFlow(true)
+    private val _isDeleting = MutableStateFlow(false)
+    private val _deleted = MutableStateFlow(false)
     private val _error = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<LitterDetailUiState> = combine(
-        catalogUseCases.observeLitter(litterId),
-        catalogUseCases.observeCurrentUser(),
+        combine(
+            catalogUseCases.observeLitter(litterId),
+            catalogUseCases.observeCurrentUser(),
+        ) { litter, user ->
+            litter to user
+        },
         _isLoading,
+        _isDeleting,
+        _deleted,
         _error,
-    ) { litter, user, loading, error ->
+    ) { data, loading, deleting, deleted, error ->
+        val (litter, user) = data
         LitterDetailUiState(
             litter = litter,
             isLoading = loading,
+            isDeleting = deleting,
             isBreeder = user?.role == UserRole.BREEDER,
+            deleted = deleted,
             error = error,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), LitterDetailUiState())
@@ -372,6 +434,17 @@ class LitterDetailViewModel(
             catalogUseCases.loadLitter(litterId)
                 .onFailure { _error.value = it.message }
             _isLoading.value = false
+        }
+    }
+
+    fun delete() {
+        viewModelScope.launch {
+            _isDeleting.value = true
+            _error.value = null
+            catalogUseCases.deleteLitter(litterId)
+                .onSuccess { _deleted.value = true }
+                .onFailure { _error.value = it.message }
+            _isDeleting.value = false
         }
     }
 }
@@ -439,11 +512,21 @@ data class KittenDetailUiState(
     val detail: KittenDetail? = null,
     val isLoading: Boolean = true,
     val isActionLoading: Boolean = false,
+    val isDeleting: Boolean = false,
     val isBreeder: Boolean = false,
     val isBuyer: Boolean = false,
     val canReserve: Boolean = false,
     val canCancel: Boolean = false,
+    val deleted: Boolean = false,
     val error: String? = null,
+)
+
+private data class KittenDetailLocalState(
+    val isLoading: Boolean,
+    val isActionLoading: Boolean,
+    val isDeleting: Boolean,
+    val deleted: Boolean,
+    val error: String?,
 )
 
 class KittenDetailViewModel(
@@ -454,6 +537,8 @@ class KittenDetailViewModel(
     private val _detail = MutableStateFlow<KittenDetail?>(null)
     private val _isLoading = MutableStateFlow(true)
     private val _isActionLoading = MutableStateFlow(false)
+    private val _isDeleting = MutableStateFlow(false)
+    private val _deleted = MutableStateFlow(false)
     private val _error = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<KittenDetailUiState> = combine(
@@ -464,23 +549,31 @@ class KittenDetailViewModel(
         ) { detail, user, reservations ->
             Triple(detail, user, reservations)
         },
-        _isLoading,
-        _isActionLoading,
-        _error,
-    ) { data, loading, actionLoading, error ->
+        combine(
+            _isLoading,
+            _isActionLoading,
+            _isDeleting,
+            _deleted,
+            _error,
+        ) { loading, actionLoading, deleting, deleted, error ->
+            KittenDetailLocalState(loading, actionLoading, deleting, deleted, error)
+        },
+    ) { data, local ->
         val (detail, user, reservations) = data
         val isBreeder = user?.role == UserRole.BREEDER
         val isBuyer = user?.role == UserRole.BUYER
         val kitten = detail?.kitten
         KittenDetailUiState(
             detail = detail,
-            isLoading = loading,
-            isActionLoading = actionLoading,
+            isLoading = local.isLoading,
+            isActionLoading = local.isActionLoading,
+            isDeleting = local.isDeleting,
             isBreeder = isBreeder,
             isBuyer = isBuyer,
             canReserve = isBuyer && kitten?.status == KittenStatus.FREE,
             canCancel = isBuyer && reservations.any { it.kittenId == kittenId },
-            error = error,
+            deleted = local.deleted,
+            error = local.error,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), KittenDetailUiState())
 
@@ -518,6 +611,17 @@ class KittenDetailViewModel(
                 .onSuccess { load() }
                 .onFailure { _error.value = it.message }
             _isActionLoading.value = false
+        }
+    }
+
+    fun delete() {
+        viewModelScope.launch {
+            _isDeleting.value = true
+            _error.value = null
+            catalogUseCases.deleteKitten(kittenId)
+                .onSuccess { _deleted.value = true }
+                .onFailure { _error.value = it.message }
+            _isDeleting.value = false
         }
     }
 }

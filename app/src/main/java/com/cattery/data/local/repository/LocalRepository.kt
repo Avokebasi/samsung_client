@@ -3,6 +3,7 @@ package com.cattery.data.local.repository
 import com.cattery.data.local.database.AppDatabase
 import com.cattery.data.local.database.entities.toEntity
 import com.cattery.data.local.database.entities.toDomain
+import com.cattery.data.local.images.LocalPhotoStore
 import com.cattery.domain.models.CatFemale
 import com.cattery.domain.models.CatMale
 import com.cattery.domain.models.Kitten
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.map
 
 class LocalRepository(
     private val database: AppDatabase,
+    private val photoStore: LocalPhotoStore,
 ) {
     private val userDao = database.userDao()
     private val catFemaleDao = database.catFemaleDao()
@@ -78,10 +80,18 @@ class LocalRepository(
             catMaleDao.clear()
             litterDao.clear()
             kittenDao.clear()
-            if (catFemales.isNotEmpty()) catFemaleDao.upsertAll(catFemales.map { it.toEntity() })
-            if (catMales.isNotEmpty()) catMaleDao.upsertAll(catMales.map { it.toEntity() })
-            if (litters.isNotEmpty()) litterDao.upsertAll(litters.map { it.toEntity() })
-            if (kittens.isNotEmpty()) kittenDao.upsertAll(kittens.map { it.toEntity() })
+            if (catFemales.isNotEmpty()) {
+                catFemaleDao.upsertAll(catFemales.map { it.withLocalPhotos().toEntity() })
+            }
+            if (catMales.isNotEmpty()) {
+                catMaleDao.upsertAll(catMales.map { it.withLocalPhotos().toEntity() })
+            }
+            if (litters.isNotEmpty()) {
+                litterDao.upsertAll(litters.map { it.withLocalPhotos().toEntity() })
+            }
+            if (kittens.isNotEmpty()) {
+                kittenDao.upsertAll(kittens.map { it.withLocalPhotos().toEntity() })
+            }
         }
     }
 
@@ -89,33 +99,33 @@ class LocalRepository(
         database.withTransaction {
             reservationDao.clear()
             if (items.isNotEmpty()) {
-                reservationDao.upsertAll(items.map { it.toEntity() })
+                reservationDao.upsertAll(items.map { it.withLocalPhotos().toEntity() })
             }
         }
     }
 
     suspend fun upsertCatFemale(item: CatFemale) {
-        catFemaleDao.upsertAll(listOf(item.toEntity()))
+        catFemaleDao.upsertAll(listOf(item.withLocalPhotos().toEntity()))
     }
 
     suspend fun upsertCatMale(item: CatMale) {
-        catMaleDao.upsertAll(listOf(item.toEntity()))
+        catMaleDao.upsertAll(listOf(item.withLocalPhotos().toEntity()))
     }
 
     suspend fun upsertLitter(item: Litter) {
-        litterDao.upsertAll(listOf(item.toEntity()))
+        litterDao.upsertAll(listOf(item.withLocalPhotos().toEntity()))
     }
 
     suspend fun upsertLitters(items: List<Litter>) {
-        if (items.isNotEmpty()) litterDao.upsertAll(items.map { it.toEntity() })
+        if (items.isNotEmpty()) litterDao.upsertAll(items.map { it.withLocalPhotos().toEntity() })
     }
 
     suspend fun upsertKitten(item: Kitten) {
-        kittenDao.upsertAll(listOf(item.toEntity()))
+        kittenDao.upsertAll(listOf(item.withLocalPhotos().toEntity()))
     }
 
     suspend fun upsertKittens(items: List<Kitten>) {
-        if (items.isNotEmpty()) kittenDao.upsertAll(items.map { it.toEntity() })
+        if (items.isNotEmpty()) kittenDao.upsertAll(items.map { it.withLocalPhotos().toEntity() })
     }
 
     suspend fun hasCachedUser(): Boolean = userDao.getCurrentUser() != null
@@ -134,5 +144,21 @@ class LocalRepository(
             kittenDao.clear()
             reservationDao.clear()
         }
+        photoStore.clearAll()
     }
+
+    private fun CatFemale.withLocalPhotos(): CatFemale =
+        copy(photoUrls = photoStore.persistRemotePhotos(photoUrls))
+
+    private fun CatMale.withLocalPhotos(): CatMale =
+        copy(photoUrls = photoStore.persistRemotePhotos(photoUrls))
+
+    private fun Litter.withLocalPhotos(): Litter =
+        copy(photoUrls = photoStore.persistRemotePhotos(photoUrls))
+
+    private fun Kitten.withLocalPhotos(): Kitten =
+        copy(photoUrls = photoStore.persistRemotePhotos(photoUrls))
+
+    private fun ReservationDetail.withLocalPhotos(): ReservationDetail =
+        copy(kittenPhotoUrls = photoStore.persistRemotePhotos(kittenPhotoUrls))
 }

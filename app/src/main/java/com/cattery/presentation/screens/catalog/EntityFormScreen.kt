@@ -48,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cattery.R
 import com.cattery.domain.models.KittenStatus
 import com.cattery.presentation.components.AvatarPickerDialog
+import com.cattery.presentation.components.DeleteConfirmDialog
 import com.cattery.presentation.components.FormDateField
 import com.cattery.presentation.components.FormTextField
 import com.cattery.presentation.components.PetPhoto
@@ -70,13 +71,24 @@ fun EntityFormScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showPhotoPicker by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     val imageHandlers = rememberImageCaptureHandlers { uri ->
-        viewModel.addPhoto(uri.toString())
+        viewModel.addPhoto(uri)
     }
 
     LaunchedEffect(uiState.completed) {
         if (uiState.completed) onCompleted()
+    }
+
+    if (showDeleteDialog) {
+        DeleteConfirmDialog(
+            onConfirm = {
+                showDeleteDialog = false
+                viewModel.delete()
+            },
+            onDismiss = { showDeleteDialog = false },
+        )
     }
 
     if (showPhotoPicker) {
@@ -121,7 +133,7 @@ fun EntityFormScreen(
                 }
                 if (uiState.isEdit) {
                     OutlinedButton(
-                        onClick = viewModel::delete,
+                        onClick = { showDeleteDialog = true },
                         enabled = !uiState.isSaving,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -163,7 +175,13 @@ fun EntityFormScreen(
                     FormTextField(
                         value = uiState.name,
                         onValueChange = viewModel::updateName,
-                        label = stringResource(R.string.field_name),
+                        label = stringResource(
+                            if (uiState.entityType == "litter") {
+                                R.string.field_litter_name
+                            } else {
+                                R.string.field_name
+                            },
+                        ),
                     )
                     FormDateField(
                         isoValue = uiState.birthDate,

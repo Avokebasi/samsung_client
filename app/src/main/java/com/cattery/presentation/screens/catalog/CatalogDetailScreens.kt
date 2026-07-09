@@ -11,7 +11,11 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -21,9 +25,10 @@ import com.cattery.R
 import com.cattery.domain.models.KittenStatus
 import com.cattery.presentation.components.CatalogDetailScaffold
 import com.cattery.presentation.components.CatalogListItem
+import com.cattery.presentation.components.DeleteConfirmDialog
 import com.cattery.presentation.components.DetailField
 import com.cattery.presentation.components.DetailSectionTitle
-import com.cattery.presentation.components.PhotoGalleryRow
+import com.cattery.presentation.components.PhotoGalleryDetail
 import com.cattery.presentation.components.petAgeSubtitle
 import com.cattery.presentation.theme.BluePrimary
 import com.cattery.presentation.util.DateFormatter
@@ -36,12 +41,28 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun CatFemaleDetailScreen(
     onBack: () -> Unit,
+    onDeleted: () -> Unit = onBack,
     onLitterClick: (Long) -> Unit,
     onEdit: () -> Unit,
     viewModel: CatFemaleDetailViewModel = koinViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val cat = uiState.cat
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState.deleted) {
+        if (uiState.deleted) onDeleted()
+    }
+
+    if (showDeleteDialog) {
+        DeleteConfirmDialog(
+            onConfirm = {
+                showDeleteDialog = false
+                viewModel.delete()
+            },
+            onDismiss = { showDeleteDialog = false },
+        )
+    }
 
     CatalogDetailScaffold(
         title = cat?.name ?: stringResource(R.string.section_cat_females),
@@ -49,6 +70,10 @@ fun CatFemaleDetailScreen(
         showEdit = uiState.isBreeder,
         editLabel = stringResource(R.string.edit),
         onEdit = onEdit,
+        showDelete = uiState.isBreeder,
+        deleteLabel = stringResource(R.string.delete),
+        onDelete = { showDeleteDialog = true },
+        actionsEnabled = !uiState.isDeleting,
     ) { padding ->
         DetailBody(
             isLoading = uiState.isLoading && cat == null,
@@ -56,7 +81,7 @@ fun CatFemaleDetailScreen(
             modifier = Modifier.padding(padding),
         ) {
             cat?.let { female ->
-                PhotoGalleryRow(photoUrls = female.photoUrls)
+                PhotoGalleryDetail(photoUrls = female.photoUrls)
                 DetailField(
                     label = stringResource(R.string.field_name),
                     value = female.name,
@@ -103,12 +128,28 @@ fun CatFemaleDetailScreen(
 @Composable
 fun CatMaleDetailScreen(
     onBack: () -> Unit,
+    onDeleted: () -> Unit = onBack,
     onLitterClick: (Long) -> Unit,
     onEdit: () -> Unit,
     viewModel: CatMaleDetailViewModel = koinViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val cat = uiState.cat
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState.deleted) {
+        if (uiState.deleted) onDeleted()
+    }
+
+    if (showDeleteDialog) {
+        DeleteConfirmDialog(
+            onConfirm = {
+                showDeleteDialog = false
+                viewModel.delete()
+            },
+            onDismiss = { showDeleteDialog = false },
+        )
+    }
 
     CatalogDetailScaffold(
         title = cat?.name ?: stringResource(R.string.section_cat_males),
@@ -116,6 +157,10 @@ fun CatMaleDetailScreen(
         showEdit = uiState.isBreeder,
         editLabel = stringResource(R.string.edit),
         onEdit = onEdit,
+        showDelete = uiState.isBreeder,
+        deleteLabel = stringResource(R.string.delete),
+        onDelete = { showDeleteDialog = true },
+        actionsEnabled = !uiState.isDeleting,
     ) { padding ->
         DetailBody(
             isLoading = uiState.isLoading && cat == null,
@@ -123,7 +168,7 @@ fun CatMaleDetailScreen(
             modifier = Modifier.padding(padding),
         ) {
             cat?.let { male ->
-                PhotoGalleryRow(photoUrls = male.photoUrls)
+                PhotoGalleryDetail(photoUrls = male.photoUrls)
                 DetailField(
                     label = stringResource(R.string.field_name),
                     value = male.name,
@@ -155,12 +200,28 @@ fun CatMaleDetailScreen(
 @Composable
 fun LitterDetailScreen(
     onBack: () -> Unit,
+    onDeleted: () -> Unit = onBack,
     onKittensClick: () -> Unit,
     onEdit: () -> Unit,
     viewModel: LitterDetailViewModel = koinViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val litter = uiState.litter
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState.deleted) {
+        if (uiState.deleted) onDeleted()
+    }
+
+    if (showDeleteDialog) {
+        DeleteConfirmDialog(
+            onConfirm = {
+                showDeleteDialog = false
+                viewModel.delete()
+            },
+            onDismiss = { showDeleteDialog = false },
+        )
+    }
 
     CatalogDetailScaffold(
         title = litter?.name ?: stringResource(R.string.section_litters),
@@ -168,6 +229,10 @@ fun LitterDetailScreen(
         showEdit = uiState.isBreeder,
         editLabel = stringResource(R.string.edit),
         onEdit = onEdit,
+        showDelete = uiState.isBreeder,
+        deleteLabel = stringResource(R.string.delete),
+        onDelete = { showDeleteDialog = true },
+        actionsEnabled = !uiState.isDeleting,
         secondaryAction = stringResource(R.string.kittens) to onKittensClick,
     ) { padding ->
         DetailBody(
@@ -176,9 +241,9 @@ fun LitterDetailScreen(
             modifier = Modifier.padding(padding),
         ) {
             litter?.let { item ->
-                PhotoGalleryRow(photoUrls = item.photoUrls)
+                PhotoGalleryDetail(photoUrls = item.photoUrls)
                 DetailField(
-                    label = stringResource(R.string.field_name),
+                    label = stringResource(R.string.field_litter_name),
                     value = item.name,
                 )
                 DetailField(
@@ -205,16 +270,32 @@ fun LitterDetailScreen(
 @Composable
 fun KittenDetailScreen(
     onBack: () -> Unit,
+    onDeleted: () -> Unit = onBack,
     onEdit: () -> Unit,
     viewModel: KittenDetailViewModel = koinViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val detail = uiState.detail
     val kitten = detail?.kitten
+    var showDeleteDialog by remember { mutableStateOf(false) }
     val buyerAction = when {
         uiState.canReserve -> stringResource(R.string.reserve) to viewModel::reserve
         uiState.canCancel -> stringResource(R.string.cancel_reservation) to viewModel::cancelReservation
         else -> null
+    }
+
+    LaunchedEffect(uiState.deleted) {
+        if (uiState.deleted) onDeleted()
+    }
+
+    if (showDeleteDialog) {
+        DeleteConfirmDialog(
+            onConfirm = {
+                showDeleteDialog = false
+                viewModel.delete()
+            },
+            onDismiss = { showDeleteDialog = false },
+        )
     }
 
     CatalogDetailScaffold(
@@ -223,8 +304,12 @@ fun KittenDetailScreen(
         showEdit = uiState.isBreeder,
         editLabel = stringResource(R.string.edit),
         onEdit = onEdit,
+        showDelete = uiState.isBreeder,
+        deleteLabel = stringResource(R.string.delete),
+        onDelete = { showDeleteDialog = true },
+        actionsEnabled = !uiState.isDeleting && !uiState.isActionLoading,
         primaryAction = buyerAction,
-        primaryActionEnabled = !uiState.isActionLoading,
+        primaryActionEnabled = !uiState.isActionLoading && !uiState.isDeleting,
     ) { padding ->
         DetailBody(
             isLoading = uiState.isLoading && kitten == null,
@@ -232,7 +317,7 @@ fun KittenDetailScreen(
             modifier = Modifier.padding(padding),
         ) {
             kitten?.let { item ->
-                PhotoGalleryRow(photoUrls = item.photoUrls)
+                PhotoGalleryDetail(photoUrls = item.photoUrls)
                 DetailField(
                     label = stringResource(R.string.field_name),
                     value = item.name,
