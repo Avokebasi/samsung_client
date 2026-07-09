@@ -66,7 +66,7 @@ class CatFemaleListViewModel(
                 CatalogListItemData(
                     id = it.id,
                     name = it.name,
-                    subtitle = petAgeSubtitle(it.birthDate),
+                    subtitle = it.color.ifBlank { petAgeSubtitle(it.birthDate) },
                     photoUrl = it.photoUrls.firstOrNull(),
                 )
             },
@@ -133,7 +133,7 @@ class CatMaleListViewModel(
                 CatalogListItemData(
                     id = it.id,
                     name = it.name,
-                    subtitle = petAgeSubtitle(it.birthDate),
+                    subtitle = it.color.ifBlank { petAgeSubtitle(it.birthDate) },
                     photoUrl = it.photoUrls.firstOrNull(),
                 )
             },

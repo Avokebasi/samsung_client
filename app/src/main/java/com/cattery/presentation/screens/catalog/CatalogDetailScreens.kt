@@ -94,6 +94,10 @@ fun CatFemaleDetailScreen(
                     label = stringResource(R.string.field_age),
                     value = petAgeSubtitle(female.birthDate),
                 )
+                DetailField(
+                    label = stringResource(R.string.field_color),
+                    value = female.color,
+                )
                 female.matingDate?.let { matingDate ->
                     DetailField(
                         label = stringResource(R.string.field_mating_date),
@@ -180,6 +184,10 @@ fun CatMaleDetailScreen(
                 DetailField(
                     label = stringResource(R.string.field_age),
                     value = petAgeSubtitle(male.birthDate),
+                )
+                DetailField(
+                    label = stringResource(R.string.field_color),
+                    value = male.color,
                 )
                 if (uiState.litters.isNotEmpty()) {
                     DetailSectionTitle(title = stringResource(R.string.section_litters))
@@ -334,11 +342,13 @@ fun KittenDetailScreen(
                     label = stringResource(R.string.field_color),
                     value = item.color,
                 )
-                item.birthWeight?.let { weight ->
-                    DetailField(
-                        label = stringResource(R.string.field_birth_weight),
-                        value = "$weight ${stringResource(R.string.weight_unit)}",
-                    )
+                if (uiState.isBreeder) {
+                    item.birthWeight?.let { weight ->
+                        DetailField(
+                            label = stringResource(R.string.field_birth_weight),
+                            value = "$weight ${stringResource(R.string.weight_unit)}",
+                        )
+                    }
                 }
                 DetailField(
                     label = stringResource(R.string.field_status),

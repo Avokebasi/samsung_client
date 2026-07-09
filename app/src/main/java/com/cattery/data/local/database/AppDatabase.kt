@@ -21,7 +21,7 @@ import com.cattery.data.local.database.entities.UserEntity
         KittenEntity::class,
         ReservationEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = false,
 )
 @TypeConverters(CatteryConverters::class)

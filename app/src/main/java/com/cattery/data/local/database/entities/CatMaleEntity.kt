@@ -10,6 +10,7 @@ data class CatMaleEntity(
     val ownerId: Long,
     val name: String,
     val birthDate: String,
+    val color: String,
     val photoUrls: List<String>,
 )
 
@@ -18,6 +19,7 @@ fun CatMaleEntity.toDomain() = CatMale(
     ownerId = ownerId,
     name = name,
     birthDate = birthDate,
+    color = color,
     photoUrls = photoUrls,
 )
 
@@ -26,5 +28,6 @@ fun CatMale.toEntity() = CatMaleEntity(
     ownerId = ownerId,
     name = name,
     birthDate = birthDate,
+    color = color,
     photoUrls = photoUrls,
 )

@@ -188,6 +188,13 @@ fun EntityFormScreen(
                         onIsoValueChange = viewModel::updateBirthDate,
                         label = stringResource(R.string.field_birth_date),
                     )
+                    if (uiState.entityType == "cat_female" || uiState.entityType == "cat_male") {
+                        FormTextField(
+                            value = uiState.color,
+                            onValueChange = viewModel::updateColor,
+                            label = stringResource(R.string.field_color),
+                        )
+                    }
                     when (uiState.entityType) {
                         "cat_female" -> {
                             Row(
@@ -250,11 +257,13 @@ fun EntityFormScreen(
                                 onValueChange = viewModel::updateColor,
                                 label = stringResource(R.string.field_color),
                             )
-                            FormTextField(
-                                value = uiState.birthWeight,
-                                onValueChange = viewModel::updateBirthWeight,
-                                label = stringResource(R.string.field_birth_weight),
-                            )
+                            if (uiState.isBreeder) {
+                                FormTextField(
+                                    value = uiState.birthWeight,
+                                    onValueChange = viewModel::updateBirthWeight,
+                                    label = stringResource(R.string.field_birth_weight),
+                                )
+                            }
                             FormDropdown(
                                 label = stringResource(R.string.field_litter),
                                 options = uiState.litters.map { it.id to it.name },

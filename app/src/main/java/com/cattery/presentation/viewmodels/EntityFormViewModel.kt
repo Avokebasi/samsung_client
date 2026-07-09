@@ -14,6 +14,7 @@ import com.cattery.domain.models.CatFemale
 import com.cattery.domain.models.CatMale
 import com.cattery.domain.models.KittenStatus
 import com.cattery.domain.models.Litter
+import com.cattery.domain.models.UserRole
 import com.cattery.domain.usecases.CatalogUseCases
 import com.cattery.presentation.navigation.Routes
 import com.cattery.presentation.util.DateFormatter
@@ -49,6 +50,7 @@ data class EntityFormUiState(
     val catFemales: List<CatFemale> = emptyList(),
     val catMales: List<CatMale> = emptyList(),
     val litters: List<Litter> = emptyList(),
+    val isBreeder: Boolean = false,
     val error: String? = null,
     val completed: Boolean = false,
 )
@@ -76,11 +78,13 @@ class EntityFormViewModel(
         catalogUseCases.observeCatFemales(),
         catalogUseCases.observeCatMales(),
         catalogUseCases.observeLitters(),
-    ) { state, females, males, litters ->
+        catalogUseCases.observeCurrentUser(),
+    ) { state, females, males, litters, user ->
         state.copy(
             catFemales = females,
             catMales = males,
             litters = litters,
+            isBreeder = user?.role == UserRole.BREEDER,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), EntityFormUiState())
 
@@ -116,6 +120,7 @@ class EntityFormViewModel(
             it.copy(
                 name = cat.name,
                 birthDate = cat.birthDate,
+                color = cat.color,
                 hadMating = cat.matingDate != null,
                 matingDate = cat.matingDate.orEmpty(),
                 photoUrls = cat.photoUrls,
@@ -128,6 +133,7 @@ class EntityFormViewModel(
             it.copy(
                 name = cat.name,
                 birthDate = cat.birthDate,
+                color = cat.color,
                 photoUrls = cat.photoUrls,
             )
         }
@@ -218,23 +224,39 @@ class EntityFormViewModel(
             }
             val id = entityId.takeIf { it != Routes.NO_ID }
             val result = when (entityType) {
-                "cat_female" -> catalogUseCases.saveCatFemale(
-                    id,
-                    SaveCatFemaleRequest(
-                        name = state.name.trim(),
-                        birthDate = birthDate,
-                        matingDate = matingDate,
-                        photoUrls = photoUrls,
-                    ),
-                )
-                "cat_male" -> catalogUseCases.saveCatMale(
-                    id,
-                    SaveCatMaleRequest(
-                        name = state.name.trim(),
-                        birthDate = birthDate,
-                        photoUrls = photoUrls,
-                    ),
-                )
+                "cat_female" -> {
+                    if (state.color.isBlank()) {
+                        setError("Укажите окрас")
+                        _state.update { it.copy(isSaving = false) }
+                        return@launch
+                    }
+                    catalogUseCases.saveCatFemale(
+                        id,
+                        SaveCatFemaleRequest(
+                            name = state.name.trim(),
+                            birthDate = birthDate,
+                            color = state.color.trim(),
+                            matingDate = matingDate,
+                            photoUrls = photoUrls,
+                        ),
+                    )
+                }
+                "cat_male" -> {
+                    if (state.color.isBlank()) {
+                        setError("Укажите окрас")
+                        _state.update { it.copy(isSaving = false) }
+                        return@launch
+                    }
+                    catalogUseCases.saveCatMale(
+                        id,
+                        SaveCatMaleRequest(
+                            name = state.name.trim(),
+                            birthDate = birthDate,
+                            color = state.color.trim(),
+                            photoUrls = photoUrls,
+                        ),
+                    )
+                }
                 "litter" -> {
                     val total = state.totalCount.toIntOrNull()
                     val males = state.maleCount.toIntOrNull()
@@ -277,7 +299,11 @@ class EntityFormViewModel(
                             name = state.name.trim(),
                             birthDate = birthDate,
                             color = state.color.trim(),
-                            birthWeight = state.birthWeight.trim().toDoubleOrNull(),
+                            birthWeight = if (state.isBreeder) {
+                                state.birthWeight.trim().toDoubleOrNull()
+                            } else {
+                                null
+                            },
                             status = state.status,
                             photoUrls = photoUrls,
                         ),
