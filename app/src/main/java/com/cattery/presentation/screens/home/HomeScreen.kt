@@ -97,25 +97,37 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Button(
-                        onClick = onNavigateToReservations,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = BluePrimary,
-                            contentColor = WhiteBackground,
-                        ),
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Text(
-                            stringResource(
-                                if (uiState.isBreeder) R.string.reservations else R.string.my_reservations,
+                        Button(
+                            onClick = onNavigateToReservations,
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = BluePrimary,
+                                contentColor = WhiteBackground,
                             ),
-                        )
-                    }
-                    if (uiState.isBreeder) {
-                        OutlinedButton(onClick = onNavigateToAddForm) {
-                            Text(stringResource(R.string.add))
+                        ) {
+                            Text(
+                                stringResource(
+                                    if (uiState.isBreeder) R.string.reservations else R.string.my_reservations,
+                                ),
+                            )
+                        }
+                        if (uiState.isBreeder) {
+                            Button(
+                                onClick = onNavigateToAddForm,
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = BluePrimary,
+                                    contentColor = WhiteBackground,
+                                ),
+                            ) {
+                                Text(stringResource(R.string.add))
+                            }
                         }
                     }
-                    Spacer(modifier = Modifier.weight(1f))
                     UserAvatar(
                         avatarUrl = uiState.user?.avatarUrl,
                         localUri = uiState.localAvatarUri,
