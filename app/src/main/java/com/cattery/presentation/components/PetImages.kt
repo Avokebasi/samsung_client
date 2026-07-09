@@ -4,13 +4,16 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -20,6 +23,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cattery.R
 import com.cattery.presentation.theme.BlueLight
+import com.cattery.presentation.util.ImageDecoder
 
 @Composable
 fun UserAvatar(
@@ -30,7 +34,7 @@ fun UserAvatar(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val model = localUri ?: avatarUrl
+    val model = localUri?.takeIf { it.isNotBlank() } ?: avatarUrl?.takeIf { it.isNotBlank() }
     Box(
         modifier = modifier
             .size(size)
@@ -39,24 +43,44 @@ fun UserAvatar(
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        if (model.isNullOrBlank()) {
-            Image(
-                painter = painterResource(R.drawable.ic_avatar_placeholder),
-                contentDescription = null,
-                modifier = Modifier.size(size * 0.7f),
-            )
-        } else {
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(model)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = null,
-                modifier = Modifier.size(size),
-                contentScale = ContentScale.Crop,
-                placeholder = painterResource(R.drawable.ic_avatar_placeholder),
-                error = painterResource(R.drawable.ic_avatar_placeholder),
-            )
+        when {
+            model.isNullOrBlank() -> {
+                Image(
+                    painter = painterResource(R.drawable.ic_avatar_placeholder),
+                    contentDescription = null,
+                    modifier = Modifier.size(size * 0.7f),
+                )
+            }
+            model.startsWith("data:image") -> {
+                val bitmap = remember(model) { ImageDecoder.decodeDataUrl(model) }
+                if (bitmap != null) {
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(R.drawable.ic_avatar_placeholder),
+                        contentDescription = null,
+                        modifier = Modifier.size(size * 0.7f),
+                    )
+                }
+            }
+            else -> {
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(model)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(R.drawable.ic_avatar_placeholder),
+                    error = painterResource(R.drawable.ic_avatar_placeholder),
+                )
+            }
         }
     }
 }
@@ -75,24 +99,44 @@ fun PetPhoto(
             .background(BlueLight),
         contentAlignment = Alignment.Center,
     ) {
-        if (photoUrl.isNullOrBlank()) {
-            Image(
-                painter = painterResource(R.drawable.ic_pet_placeholder),
-                contentDescription = null,
-                modifier = Modifier.size(size * 0.65f),
-            )
-        } else {
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(photoUrl)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = null,
-                modifier = Modifier.size(size),
-                contentScale = ContentScale.Crop,
-                placeholder = painterResource(R.drawable.ic_pet_placeholder),
-                error = painterResource(R.drawable.ic_pet_placeholder),
-            )
+        when {
+            photoUrl.isNullOrBlank() -> {
+                Image(
+                    painter = painterResource(R.drawable.ic_pet_placeholder),
+                    contentDescription = null,
+                    modifier = Modifier.size(size * 0.65f),
+                )
+            }
+            photoUrl.startsWith("data:image") -> {
+                val bitmap = remember(photoUrl) { ImageDecoder.decodeDataUrl(photoUrl) }
+                if (bitmap != null) {
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(R.drawable.ic_pet_placeholder),
+                        contentDescription = null,
+                        modifier = Modifier.size(size * 0.65f),
+                    )
+                }
+            }
+            else -> {
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(photoUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(R.drawable.ic_pet_placeholder),
+                    error = painterResource(R.drawable.ic_pet_placeholder),
+                )
+            }
         }
     }
 }

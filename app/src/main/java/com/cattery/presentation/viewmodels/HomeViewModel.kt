@@ -101,9 +101,15 @@ class HomeViewModel(
                 _error.value = "Не удалось обработать фото"
                 return@launch
             }
+            _localAvatarUri.value = dataUrl
             catalogUseCases.updateAvatar(dataUrl)
-                .onSuccess { _localAvatarUri.value = null }
-                .onFailure { _error.value = it.message }
+                .onSuccess { user ->
+                    _localAvatarUri.value = if (user.avatarUrl.isNullOrBlank()) dataUrl else null
+                }
+                .onFailure {
+                    _localAvatarUri.value = null
+                    _error.value = it.message
+                }
         }
     }
 
