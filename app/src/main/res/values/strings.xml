@@ -40,7 +40,7 @@
     <string name="field_litter_name">Название</string>
     <string name="field_birth_date">Дата рождения</string>
     <string name="field_age">Возраст</string>
-    <string name="field_mating_date">Дата случки</string>
+    <string name="field_mating_date">Дата вязки</string>
     <string name="field_birth_due_date">Ожидаемая дата родов</string>
     <string name="field_total_count">Всего</string>
     <string name="field_male_count">Мальчики</string>
